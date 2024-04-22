@@ -13,12 +13,15 @@ void Server::set_server()
 void Server::accept_connections()
 {
 	bind(server, (const sockaddr*)&(this->serverAddr), sizeof(this->serverAddr));
-	listen(server, 5);
-	// connect(clients[0], (struct sockaddr*)&serverAddr, sizeof(serverAddr));
-	int clientSocket = accept(server, nullptr, nullptr);
-	char buffer[1024] = {0};
-	recv(clientSocket, buffer, sizeof(buffer), 0);
-	std::cout << "Message from client: " << buffer << std::endl;
+	while(1)
+	{
+		listen(server, 5);
+		// connect(clients[0], (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+		int clientSocket = accept(server, nullptr, nullptr);
+		char buffer[1024] = {0};
+		recv(clientSocket, buffer, sizeof(buffer), 0);
+		std::cout << "Message from client: " << buffer << std::endl;
+	}
 	close(server);
 
 }

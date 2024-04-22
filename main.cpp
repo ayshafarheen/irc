@@ -6,6 +6,5 @@ int main(int argc, char **argv)
 	{
 		Server serv(argv);
 		serv.set_server();
-		// Client::create_client();
 	}
 }
