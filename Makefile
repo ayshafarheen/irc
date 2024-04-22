@@ -3,16 +3,16 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: fathmanazmeen <fathmanazmeen@student.42    +#+  +:+       +#+         #
+#    By: afarheen <afarheen@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/11/07 08:53:04 by afarheen          #+#    #+#              #
-#    Updated: 2024/04/19 18:20:10 by fathmanazme      ###   ########.fr        #
+#    Updated: 2024/04/22 08:29:29 by afarheen         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ircserv
 
-MY_SOURCES = main.cpp 
+MY_SOURCES = main.cpp server.cpp client.cpp
 
 MY_OBJS = $(MY_SOURCES:.cpp=.o)
 
