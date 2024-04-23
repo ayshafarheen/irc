@@ -4,7 +4,14 @@ int main(int argc, char **argv)
 {
 	if(argc == 3)
 	{
-		Server serv(argv);
-		serv.set_server();
+		try
+		{
+			Server serv(argv);
+			serv.set_server();
+		}
+		catch(int n)
+		{
+
+		}
 	}
 }

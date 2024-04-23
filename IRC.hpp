@@ -46,6 +46,7 @@ class Server
 	void set_server();
 	Server(char **argv);
 	int get_server();
+	void serv_handle(int n);
 	void accept_connections();
 };
 
