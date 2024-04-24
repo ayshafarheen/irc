@@ -13,6 +13,11 @@ void Client::create_client()
 	close(client);
 }
 
+Client::Client(int socket)
+{
+	fd = socket;
+}
+
 // int main(int argc, char **argv)
 // {
 

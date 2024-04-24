@@ -28,9 +28,12 @@ class Client
 	std::string nickname;
 	std::string username;
 	std::string user_type;
+	std::string msg;
+	int fd;
 
 	public:
 	static void create_client();
+	Client(int socket);
 };
 
 class Server
@@ -46,7 +49,9 @@ class Server
 	void set_server();
 	Server(char **argv);
 	int get_server();
-	void serv_handle(int n);
+	int accept_new_connection(int server, fd_set *ready_sockets);
+	static void serv_handle(int n);
+	void handle_connection(int clientsocket);
 	void accept_connections();
 };
 
