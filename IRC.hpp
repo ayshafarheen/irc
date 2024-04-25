@@ -41,9 +41,12 @@ class Server
 	private:
 	sockaddr_in serverAddr;
 	int server;
+	int maxfd;
 	std::vector<int> clients;
 	std::string password;
 	int port;
+	fd_set current_sockets;
+	std::string msg;
 
 	public:
 	void set_server();
@@ -54,6 +57,5 @@ class Server
 	void handle_connection(int clientsocket);
 	void accept_connections();
 };
-
 
 #endif

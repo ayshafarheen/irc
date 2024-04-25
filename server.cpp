@@ -23,14 +23,22 @@ void Server::serv_handle(int n)
 
 void Server::set_server()
 {
+	int fail;
 	try
 	{
 		server = socket(AF_INET, SOCK_STREAM, 0);
+		maxfd = server;
 		if(server == -1)
 			throw (1);
 		this->serverAddr.sin_family = AF_INET;//IPV4
 		this->serverAddr.sin_port = htons(port);//port number host to network
 		this->serverAddr.sin_addr.s_addr = INADDR_ANY; //dont bind to particular ip but listen for all available IPs
+		fail = bind(server, (const sockaddr*)&(this->serverAddr), sizeof(this->serverAddr));
+		if(fail == -1)
+			throw(3);
+		fail = listen(server, 5);
+		if(fail == -1)
+			throw(4);
 		accept_connections();
 	}
 	catch(int n)
@@ -44,20 +52,20 @@ void Server::handle_connection(int clientSocket)
 	int fail;
 
 	Client client(clientSocket);
-	// while(1)
-	// {
-		char buffer[1024] = {0};
-		fail = recv(clientSocket, buffer, sizeof(buffer), 0);
-		if(fail == -1)
-			throw (6);
-		if(fail == 0)
-		{
-			std::cout << "Connection closed! " << std::endl;
-			// break;
-		}
-		*strchr(buffer, '\n') = 0;
-		std::cout << "Message from client: " << buffer << std::endl;
-	// }
+
+	char buffer[1024] = {0};
+	fail = recv(clientSocket, buffer, sizeof(buffer), 0);
+	if(fail == -1)
+		throw (6);
+	if(fail == 0)
+	{
+		std::cout << "Connection closed! " << std::endl;
+		FD_CLR(clientSocket, &current_sockets);
+		return ;
+	}
+	*strchr(buffer, '\n') = 0;
+	msg = buffer;
+	std::cout << "Message from client: " << msg << std::endl;
 }
 
 int Server::accept_new_connection(int server, fd_set *ready_sockets)
@@ -67,35 +75,24 @@ int Server::accept_new_connection(int server, fd_set *ready_sockets)
 		throw (5);
 	else
 		FD_SET(clientSocket, ready_sockets);
+	if(clientSocket > maxfd)
+		maxfd = clientSocket;
 	return clientSocket;
 }
 
 void Server::accept_connections()
 {
-	int fail;
-	fail = bind(server, (const sockaddr*)&(this->serverAddr), sizeof(this->serverAddr));
-	if(fail == -1)
-		throw(3);
-	fd_set current_sockets, ready_sockets;
-	FD_ZERO(&current_sockets);
-	FD_SET(server, &current_sockets);
-	struct timeval tv;
+	fd_set ready_sockets;
 	int clientSocket;
-	tv.tv_sec = 2;
-	tv.tv_usec = 500000;
-	fail = listen(server, 5);
 
+	FD_ZERO(&ready_sockets);
+	FD_SET(server, &current_sockets);
 	while(1)
 	{
 		ready_sockets = current_sockets;
-		if(select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0) {
+		if(select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
 			throw (7);
-		}
-			// std::cout << "here";
-		if(fail == -1)
-			throw(4);
-
-		for(int i = 0; i< FD_SETSIZE; i++)
+		for(int i = 0; i < FD_SETSIZE; i++)
 		{
 			if(FD_ISSET(i,&ready_sockets))
 			{
@@ -105,19 +102,11 @@ void Server::accept_connections()
 					FD_SET(clientSocket, &current_sockets);
 				}
 				else
-				{
 					handle_connection(i);
-					std::cout << "here";
-					FD_CLR(i, &current_sockets);
-				}
 			}
 		}
-		clientSocket = accept_new_connection(server, &ready_sockets);
-		// handle_connection(clientSocket);
 	}
-		std::cout << "here";
 	close(server);
-
 }
 
 int Server::get_server()
@@ -137,6 +126,6 @@ Server::Server(char **argv)
 	port = strtod(argv[1], NULL);
 	if(port < 0 || port > 65353)
 		throw 2;
-	// std::cout << "here";
 	password = argv[2];
+	FD_ZERO(&current_sockets);
 }
