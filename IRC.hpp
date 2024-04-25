@@ -12,6 +12,7 @@
 #include <ctime>
 #include <stdlib.h>
 #include <vector>
+#include <cstring>
 #include <list>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -42,7 +43,7 @@ class Server
 	sockaddr_in serverAddr;
 	int server;
 	int maxfd;
-	std::vector<int> clients;
+	std::vector<Client> clients;
 	std::string password;
 	int port;
 	fd_set current_sockets;
@@ -52,7 +53,7 @@ class Server
 	void set_server();
 	Server(char **argv);
 	int get_server();
-	int accept_new_connection(int server, fd_set *ready_sockets);
+	int accept_new_connection(int server);
 	static void serv_handle(int n);
 	void handle_connection(int clientsocket);
 	void accept_connections();

@@ -52,7 +52,7 @@ void Server::handle_connection(int clientSocket)
 	int fail;
 
 	Client client(clientSocket);
-
+	clients.push_back(client);
 	char buffer[1024] = {0};
 	fail = recv(clientSocket, buffer, sizeof(buffer), 0);
 	if(fail == -1)
@@ -68,18 +68,17 @@ void Server::handle_connection(int clientSocket)
 	std::cout << "Message from client: " << msg << std::endl;
 }
 
-int Server::accept_new_connection(int server, fd_set *ready_sockets)
+int Server::accept_new_connection(int server)
 {
-	int clientSocket = accept(server, nullptr, nullptr);
+	int clientSocket = accept(server, NULL, NULL);
 	if(clientSocket == -1)
 		throw (5);
-	else
-		FD_SET(clientSocket, ready_sockets);
 	if(clientSocket > maxfd)
 		maxfd = clientSocket;
 	return clientSocket;
 }
 
+//select() gives you the power to monitor several sockets at the same time
 void Server::accept_connections()
 {
 	fd_set ready_sockets;
@@ -89,6 +88,7 @@ void Server::accept_connections()
 	FD_SET(server, &current_sockets);
 	while(1)
 	{
+		//select changes the set passed in so we ned temporary copy
 		ready_sockets = current_sockets;
 		if(select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
 			throw (7);
@@ -98,11 +98,14 @@ void Server::accept_connections()
 			{
 				if(i == server)
 				{
-					clientSocket = accept_new_connection(server, &ready_sockets);
+					clientSocket = accept_new_connection(server);
 					FD_SET(clientSocket, &current_sockets);
 				}
 				else
+				{
 					handle_connection(i);
+					break;
+				}
 			}
 		}
 	}
