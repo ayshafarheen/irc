@@ -33,7 +33,13 @@ class Client
 	int fd;
 
 	public:
+	void set_msg(std::string);
+	std::string get_msg();
+	int get_fd();
+	Client(Client &obj);
+	Client &operator=(Client &obj);
 	static void create_client();
+	Client();
 	Client(int socket);
 };
 
@@ -43,7 +49,7 @@ class Server
 	sockaddr_in serverAddr;
 	int server;
 	int maxfd;
-	std::vector<Client> clients;
+	std::map<std::string, Client> clients;
 	std::string password;
 	int port;
 	fd_set current_sockets;
