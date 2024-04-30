@@ -17,13 +17,21 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <vector>
+#include "Channel.hpp"
 
-class Channel
-{
-	std::vector<int> clients;
-	std::string topic;
-};
 
+// class Channel 
+// {
+// 	// typedef std::map<std::string, Client *>::iterator ite;
+
+// 	std::vector<int> clients;
+// 	// std::string topic;
+// 	// std::map<std::string, Client *> joined
+
+
+
+// };
+class Channel;
 class Client
 {
 	std::string nickname;
@@ -33,9 +41,16 @@ class Client
 	int fd;
 
 	public:
+	void set_msg(std::string);
+	std::string get_msg();
+	int get_fd();
+	Client(Client &obj);
+	Client &operator=(Client &obj);
 	static void create_client();
+	Client();
 	Client(int socket);
 };
+
 
 class Server
 {
@@ -44,6 +59,7 @@ class Server
 	int server;
 	int maxfd;
 	std::vector<Client> clients;
+	typedef std::vector<Client>::iterator iter;
 	std::string password;
 	int port;
 	fd_set current_sockets;
@@ -57,6 +73,12 @@ class Server
 	static void serv_handle(int n);
 	void handle_connection(int clientsocket);
 	void accept_connections();
+	int clientnum(std::vector<Client> clients, int clientsoc);
+	int getClient(Client *hep);
+	int commandCheck(std::string command);
+
+
 };
+	// std::ostream &operator<<(std::ostream &os, const Server &p);
 
 #endif
