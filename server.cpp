@@ -21,7 +21,6 @@ void Server::serv_handle(int n)
 
 }
 
-
 void Server::set_server()
 {
 	int fail;
@@ -50,7 +49,7 @@ void Server::set_server()
 
 void Server::handle_connection(int clientSocket)
 {
-		int fail;
+	int fail;
 
 	char buffer[1024] = {0};
 	fail = recv(clientSocket, buffer, sizeof(buffer), 0);
@@ -67,7 +66,6 @@ void Server::handle_connection(int clientSocket)
 	Client client = clients[std::to_string(clientSocket)];
 	client.set_msg(buffer);
 	std::cout << "Message from client " << client.get_fd() << ": "<< client.get_msg() << std::endl;
-	std::cout << "try" << clientnum(clients, clientSocket) << std::endl;
 }
 
 int Server::accept_new_connection(int server)
@@ -115,23 +113,6 @@ void Server::accept_connections()
 		}
 	}
 	close(server);
-}
-
-int Server::commandCheck(std::string command)
-{
-	                            
-}
-
-int Server::clientnum(std::vector<Client>clients, int clientsoc)
-{
-	iter help;
-	int count = 0;
-	for(help = clients.begin(); help !=  clients.end(); ++help)
-	{
-		count++;
-	}
-	std::cout << "hiiiiiii"<< clientsoc << std::endl;
-	return count;
 }
 
 int Server::get_server()

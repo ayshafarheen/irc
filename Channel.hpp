@@ -1,3 +1,8 @@
+
+
+#ifndef CHANNEL_H
+# define CHANNEL_H
+
 #include <iostream>
 #include <string>
 #include <exception>
@@ -17,18 +22,23 @@
 #include "IRC.hpp"
 #include <stdbool.h>
 
-#ifndef CHANNEL_H
-# define CHANNEL_H
+class Client;
 
-class Channel : public Server
+class Channel
 {
 	private:
+	std::string name;
+	std::string topic;
 	typedef std::map<std::string, Client *>::iterator ite;
 	std::vector<int> clients;
 	std::string topic;
 	std::map<std::string, Client *> joined;
 	std::map<std::string, Client *> banned;
 	bool					isOper;
+	bool					isInv;
+	bool					hasPass;
+	int 					usrLim;
+
 
 
 	
@@ -36,6 +46,11 @@ class Channel : public Server
 	public:
 			Channel(std::string serv_name, Client *maker);
 			~Channel();
+			void addMember();
+			std::string	getServName();
+			std::string getTopic();
+			
+
 };
 
 #endif

@@ -19,7 +19,6 @@
 #include <vector>
 #include "Channel.hpp"
 
-
 // class Channel 
 // {
 // 	// typedef std::map<std::string, Client *>::iterator ite;
@@ -31,7 +30,9 @@
 
 
 // };
-class Channel;
+// class Channel;
+
+#define CYAN "\x1B[36m";
 class Client
 {
 	std::string nickname;
@@ -51,15 +52,13 @@ class Client
 	Client(int socket);
 };
 
-
 class Server
 {
 	private:
 	sockaddr_in serverAddr;
 	int server;
 	int maxfd;
-	std::vector<Client> clients;
-	typedef std::vector<Client>::iterator iter;
+	std::map<std::string, Client> clients;
 	std::string password;
 	int port;
 	fd_set current_sockets;
@@ -73,12 +72,6 @@ class Server
 	static void serv_handle(int n);
 	void handle_connection(int clientsocket);
 	void accept_connections();
-	int clientnum(std::vector<Client> clients, int clientsoc);
-	int getClient(Client *hep);
-	int commandCheck(std::string command);
-
-
 };
-	// std::ostream &operator<<(std::ostream &os, const Server &p);
 
 #endif
