@@ -45,8 +45,8 @@ class Client
 	void set_msg(std::string);
 	std::string get_msg();
 	int get_fd();
-	Client(Client &obj);
-	Client &operator=(Client &obj);
+	Client(const Client &obj);
+	Client &operator=(const Client &obj);
 	static void create_client();
 	Client();
 	Client(int socket);
@@ -72,6 +72,27 @@ class Server
 	static void serv_handle(int n);
 	void handle_connection(int clientsocket);
 	void accept_connections();
+	void check_message();
+	void parse_and_execute_client_command(const std::string &clientmsg, Client client);
 };
+
+//commands
+/*
+KICK
+INVITE
+TOPIC
+MODE
+	 Set/remove Invite-only channel
+	 Set/remove the restrictions of the TOPIC
+	 Set/remove the channel key
+	 Give/take channel operator privilege
+	 Set/remove the user limit to channel
+USER
+NICK
+PASS
+CREATE
+JOIN
+PRIVMSG
+*/
 
 #endif

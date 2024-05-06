@@ -32,13 +32,12 @@ std::string Client::get_msg()
 	return msg;
 }
 
-Client::Client(Client &obj)
+Client::Client(const Client &obj)
 {
 	*this = obj;
 }
 
-
-Client & Client::operator=(Client &obj)
+Client & Client::operator=(const Client &obj)
 {
 	if(this != &obj)
 	{
