@@ -92,14 +92,10 @@ void Server::command_pass_parsing(const std::string &args, Client client)
 		FD_CLR(client.get_fd(), &current_sockets);
 		const char* message = "Incorrect password!\n";
 		send(client.get_fd(), message, strlen(message), 0);
-		// send()
 		close(client.get_fd());
-		// throw 9;
 	}
 	else
 		client.set_auth(1);
-    // (void)args;
-	// (void)client;
 }
 
 // Typedef for function pointers
