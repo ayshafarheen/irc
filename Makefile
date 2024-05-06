@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ansulist <ansulist@student.42abudhabi.a    +#+  +:+       +#+         #
+#    By: afarheen <afarheen@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/11/07 08:53:04 by afarheen          #+#    #+#              #
-#    Updated: 2024/05/05 14:29:18 by ansulist         ###   ########.fr        #
+#    Updated: 2024/05/06 10:23:47 by afarheen         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ MY_SOURCES = main.cpp server.cpp client.cpp parse.cpp
 
 MY_OBJS = $(MY_SOURCES:.cpp=.o)
 
-CXXFLAGS =  -Wall -Wextra -Werror -std=c++98
+CXXFLAGS =  -Wall -Wextra -Werror -std=c++98 -g
 
 CXX = c++
 

@@ -30,10 +30,12 @@ class Client
 	std::string username;
 	std::string user_type;
 	std::string msg;
+	int auth;
 	int fd;
 
 	public:
 	void set_msg(std::string);
+	void set_auth(int auth);
 	std::string get_msg();
 	int get_fd();
 	Client(const Client &obj);
@@ -47,23 +49,35 @@ class Server
 {
 	private:
 	sockaddr_in serverAddr;
-	int server;
+	static int server;
 	int maxfd;
 	std::map<std::string, Client> clients;
-	std::string password;
+	std::map<std::string, Client> auth_clients;
+	static std::string password;
+	void command_quit_parsing(const std::string &args, Client client);
+	void command_join_parsing(const std::string &args, Client client);
+	void command_kick_parsing(const std::string &args, Client client);
+	void command_invite_parsing(const std::string &args, Client client);
+	void command_mode_parsing(const std::string &args, Client client);
+	void command_user_parsing(const std::string &args, Client client);
+	void command_nick_parsing(const std::string &args, Client client);
+	void command_pass_parsing(const std::string &args, Client client);
 	int port;
 	fd_set current_sockets;
 	std::string msg;
 
 	public:
 	void set_server();
+	static std::string get_pass();
 	Server(char **argv);
-	int get_server();
+	static int get_server();
 	int accept_new_connection(int server);
 	static void serv_handle(int n);
 	void handle_connection(int clientsocket);
 	void accept_connections();
 	void check_message();
+	// void command_pass_parsing(const std::string &args, Client client);
+	// static void set_pass(std::string pass);
 	void parse_and_execute_client_command(const std::string &clientmsg, Client client);
 };
 
