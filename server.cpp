@@ -65,7 +65,7 @@ void Server::handle_connection(int clientSocket)
 	Client client = clients[std::to_string(clientSocket)];
 	client.set_msg(buffer);
 	std::cout << "Message from client " << client.get_fd() << ": " << client.get_msg() << std::endl;
-	parse_and_execute_client_command(client.get_msg());
+	parse_and_execute_client_command(client.get_msg(), client);
 }
 
 int Server::accept_new_connection(int server)

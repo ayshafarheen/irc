@@ -63,9 +63,27 @@ class Server
 	static void serv_handle(int n);
 	void handle_connection(int clientsocket);
 	void accept_connections();
+	void check_message();
+	void parse_and_execute_client_command(const std::string &clientmsg, Client client);
 };
 
-void check_message();
-void parse_and_execute_client_command(const std::string &clientmsg);
+//commands
+/*
+KICK
+INVITE
+TOPIC
+MODE
+	 Set/remove Invite-only channel
+	 Set/remove the restrictions of the TOPIC
+	 Set/remove the channel key
+	 Give/take channel operator privilege
+	 Set/remove the user limit to channel
+USER
+NICK
+PASS
+CREATE
+JOIN
+PRIVMSG
+*/
 
 #endif

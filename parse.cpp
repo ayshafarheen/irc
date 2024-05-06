@@ -38,37 +38,60 @@ std::string first_word(const std::string &str)
 }
 
 // QUIT :Leaving IRC
-void command_quit_parsing(const std::string &args)
+void command_quit_parsing(const std::string &args, Client client)
 {
     std::cout << "PARSE [" << args << "]" << std::endl;
+	(void)client;
 }
 
 // JOIN #chatroom1,#chatroom2
-void command_join_parsing(const std::string &args)
+void command_join_parsing(const std::string &args, Client client)
 {
     (void)args;
+	(void)client;
 }
 
 // KICK #chatroom1 user123 :You are kicked!
-void command_kick_parsing(const std::string &args)
+void command_kick_parsing(const std::string &args, Client client)
 {
     (void)args;
+	(void)client;
 }
 
 // INVITE user123 #chatroom1
-void command_invite_parsing(const std::string &args)
+void command_invite_parsing(const std::string &args, Client client)
 {
     (void)args;
+	(void)client;
 }
 
 // MODE #chatroom1 +o user123
-void command_mode_parsing(const std::string &args)
+void command_mode_parsing(const std::string &args, Client client)
 {
     (void)args;
+	(void)client;
+}
+
+void command_user_parsing(const std::string &args, Client client)
+{
+    (void)args;
+	(void)client;
+}
+
+void command_nick_parsing(const std::string &args, Client client)
+{
+    (void)args;
+	(void)client;
+}
+
+void command_pass_parsing(const std::string &args, Client client)
+{
+    (void)args;
+	(void)client;
 }
 
 // Typedef for function pointers
-typedef void (*CommandFunction)(const std::string &args);
+typedef void (*CommandFunction)(const std::string &args, Client client);
 
 std::string trim(const std::string &str)
 {
@@ -83,7 +106,7 @@ std::string trim(const std::string &str)
     return result;
 }
 
-void parse_and_execute_client_command(const std::string &clientmsg)
+void Server::parse_and_execute_client_command(const std::string &clientmsg, Client client)
 {
     std::vector<std::string> words;
     std::string command_name;
@@ -94,6 +117,9 @@ void parse_and_execute_client_command(const std::string &clientmsg)
     commandMap.insert(std::make_pair("KICK", command_kick_parsing));
     commandMap.insert(std::make_pair("INVITE", command_invite_parsing));
     commandMap.insert(std::make_pair("MODE", command_mode_parsing));
+	commandMap.insert(std::make_pair("USER", command_user_parsing));
+    commandMap.insert(std::make_pair("NICK", command_nick_parsing));
+	commandMap.insert(std::make_pair("PASS", command_pass_parsing));
 
     command_name = first_word(clientmsg);
     if (command_name.empty())
@@ -105,7 +131,7 @@ void parse_and_execute_client_command(const std::string &clientmsg)
     // Call the function associated with the command name
     if (commandMap.find(command_name) != commandMap.end())
     {
-        commandMap[command_name](trim(clientmsg.substr(command_name.length())));
+        commandMap[command_name](trim(clientmsg.substr(command_name.length())), client);
     }
     else
     {
