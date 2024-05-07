@@ -43,6 +43,11 @@ class Client
 	static void create_client();
 	Client();
 	Client(int socket);
+	int get_auth();
+	std::string get_nick();
+	void set_nick(std::string nick);
+	std::string get_user();
+	void set_user(std::string user);
 };
 
 class Server

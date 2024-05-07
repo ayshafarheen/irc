@@ -29,6 +29,11 @@ int Client::get_fd()
 	return fd;
 }
 
+int Client::get_auth()
+{
+	return auth;
+}
+
 void Client::set_auth(int auth)
 {
 	this->auth = auth;
@@ -37,6 +42,26 @@ void Client::set_auth(int auth)
 std::string Client::get_msg()
 {
 	return msg;
+}
+
+std::string Client::get_nick()
+{
+	return nickname;
+}
+
+void Client::set_nick(std::string nick)
+{
+	nickname = nick;
+}
+
+void Client::set_user(std::string user)
+{
+	username = user;
+}
+
+std::string Client::get_user()
+{
+	return username;
 }
 
 Client::Client(const Client &obj)

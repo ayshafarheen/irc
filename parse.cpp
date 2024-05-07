@@ -74,14 +74,36 @@ void Server::command_mode_parsing(const std::string &args, Client client)
 
 void Server::command_user_parsing(const std::string &args, Client client)
 {
-    (void)args;
-	(void)client;
+    if (auth_clients.find(args) == auth_clients.end())
+    {
+        client.set_user(args);
+        if(client.get_auth() && client.get_nick() != "")
+            auth_clients[args] = clients[std::to_string(client.get_fd())];
+    }
+    else {
+        clients.erase(std::to_string(client.get_fd()));
+		FD_CLR(client.get_fd(), &current_sockets);
+		const char* message = "Client exists!\n";
+		send(client.get_fd(), message, strlen(message), 0);
+		close(client.get_fd());
+    }
 }
 
 void Server::command_nick_parsing(const std::string &args, Client client)
 {
-    (void)args;
-	(void)client;
+    if (auth_clients.find(args) == auth_clients.end())
+    {
+        client.set_nick(args);
+        if(client.get_auth() && client.get_user() != "")
+            auth_clients[args] = clients[std::to_string(client.get_fd())];
+    }
+    else {
+        clients.erase(std::to_string(client.get_fd()));
+		FD_CLR(client.get_fd(), &current_sockets);
+		const char* message = "Client exists!\n";
+		send(client.get_fd(), message, strlen(message), 0);
+		close(client.get_fd());
+    }
 }
 
 void Server::command_pass_parsing(const std::string &args, Client client)
