@@ -1,5 +1,8 @@
 #include "IRC.hpp"
 
+std::string Server::password = "";
+int Server::server = 0;
+
 void Server::serv_handle(int n)
 {
 	if (n == 1)
@@ -18,6 +21,8 @@ void Server::serv_handle(int n)
 		std::cerr << "Select error\n";
 	if (n == 8)
 		std::cerr << "Invalid client socket\n";
+	if (n == 9)
+		std::cerr << "Incorrect password\n";
 }
 
 void Server::set_server()
@@ -134,4 +139,9 @@ Server::Server(char **argv)
 		throw 2;
 	password = argv[2];
 	FD_ZERO(&current_sockets);
+}
+
+std::string Server::get_pass()
+{
+	return password;
 }

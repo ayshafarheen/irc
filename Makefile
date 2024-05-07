@@ -5,8 +5,8 @@
 #                                                     +:+ +:+         +:+      #
 #    By: juhaamid <juhaamid@student.42abudhabi.a    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: Invalid date        by                   #+#    #+#              #
-#    Updated: 2024/05/06 12:44:46 by juhaamid         ###   ########.fr        #
+#    Created: 2023/11/07 08:53:04 by afarheen          #+#    #+#              #
+#    Updated: 2024/05/07 10:48:54 by juhaamid         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@ MY_SOURCES = main.cpp server.cpp client.cpp parse.cpp
 
 MY_OBJS = $(MY_SOURCES:.cpp=.o)
 
-CXXFLAGS =  -Wall -Wextra -Werror 
+CXXFLAGS =  -Wall -Wextra -Werror -std=c++98 -g
 
 CXX = c++
 

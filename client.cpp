@@ -7,6 +7,7 @@ Client::Client(int socket)
 	user_type = "";
 	msg = "";
 	fd = socket;
+	auth = 0;
 }
 
 Client::Client()
@@ -16,6 +17,7 @@ Client::Client()
 	user_type = "";
 	msg = "";
 	fd = -1;
+	auth = 0;
 }
 void Client::set_msg(std::string newmsg)
 {
@@ -25,6 +27,11 @@ void Client::set_msg(std::string newmsg)
 int Client::get_fd()
 {
 	return fd;
+}
+
+void Client::set_auth(int auth)
+{
+	this->auth = auth;
 }
 
 std::string Client::get_msg()
@@ -46,6 +53,7 @@ Client & Client::operator=(const Client &obj)
 		user_type = obj.user_type;
 		msg = obj.msg;
 		fd = obj.fd;
+		auth = obj.auth;
 	}
 	return *this;
 }
