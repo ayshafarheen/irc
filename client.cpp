@@ -19,6 +19,15 @@ Client::Client()
 	fd = -1;
 	auth = 0;
 }
+
+int Client::invalid_nick(std::string nick)
+{
+	for(int i=0 ; i < nick.length(); i++)
+	{
+		if(isalnum(nick[i]))
+	}
+}
+
 void Client::set_msg(std::string newmsg)
 {
 	msg = newmsg;

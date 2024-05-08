@@ -17,6 +17,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <vector>
+#include "numericalReplies.hpp"
 
 class Channel
 {
@@ -48,6 +49,7 @@ class Client
 	void set_nick(std::string nick);
 	std::string get_user();
 	void set_user(std::string user);
+	int invalid_nick(std::string);
 };
 
 class Server

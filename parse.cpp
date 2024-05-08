@@ -74,33 +74,42 @@ void Server::command_mode_parsing(const std::string &args, Client client)
 
 void Server::command_user_parsing(const std::string &args, Client client)
 {
-    if (auth_clients.find(args) == auth_clients.end())
-    {
-        client.set_user(args);
-        if(client.get_auth() && client.get_nick() != "")
-            auth_clients[args] = clients[std::to_string(client.get_fd())];
-    }
-    else {
-        clients.erase(std::to_string(client.get_fd()));
-		FD_CLR(client.get_fd(), &current_sockets);
-		const char* message = "Client exists!\n";
-		send(client.get_fd(), message, strlen(message), 0);
-		close(client.get_fd());
-    }
+    // if (auth_clients.find(args) == auth_clients.end())
+    // {
+    //     client.set_user(args);
+    //     if(client.get_auth() && client.get_nick() != "")
+    //         auth_clients[args] = clients[std::to_string(client.get_fd())];
+    // }
+    // else {
+    //     clients.erase(std::to_string(client.get_fd()));
+	// 	FD_CLR(client.get_fd(), &current_sockets);
+	// 	const char* message = "Client exists!\n";
+	// 	send(client.get_fd(), message, strlen(message), 0);
+	// 	close(client.get_fd());
+    // }
+	if (client.get_nick() != "" && auth_clients.find(client.get_nick()) != auth_clients.end())
+	{
+		std::cerr << ERR_ALREADYREGISTERED(client.get_nick());
+	}
 }
 
 void Server::command_nick_parsing(const std::string &args, Client client)
 {
-    if (auth_clients.find(args) == auth_clients.end())
+	std::string nick = trim(args);
+	if(nick == "")
+		std::cerr << ERR_NONICKNAMEGIVEN(client.get_nick());
+	else if(invalid_nick(nick))
+		std::cerr << ERR_ERRONEUSNICKNAME(client.get_user(), client.get_nick());
+    else if (auth_clients.find(nick) == auth_clients.end())
     {
-        client.set_nick(args);
+        client.set_nick(nick);
         if(client.get_auth() && client.get_user() != "")
-            auth_clients[args] = clients[std::to_string(client.get_fd())];
+            auth_clients[nick] = clients[std::to_string(client.get_fd())];
     }
     else {
         clients.erase(std::to_string(client.get_fd()));
 		FD_CLR(client.get_fd(), &current_sockets);
-		const char* message = "Client exists!\n";
+		const char* message = (ERR_NICKNAMEINUSE(client.get_user(), client.get_nick())).c_str();
 		send(client.get_fd(), message, strlen(message), 0);
 		close(client.get_fd());
     }
