@@ -4,7 +4,7 @@ Client::Client(int socket)
 {
 	nickname = "";
 	username = "";
-	user_type = "";
+	// user_type = "";
 	msg = "";
 	fd = socket;
 	auth = 0;
@@ -14,7 +14,7 @@ Client::Client()
 {
 	nickname = "";
 	username = "";
-	user_type = "";
+	// user_type = "";
 	msg = "";
 	fd = -1;
 	auth = 0;
@@ -22,10 +22,14 @@ Client::Client()
 
 int Client::invalid_nick(std::string nick)
 {
-	for(int i=0 ; i < nick.length(); i++)
+	for(unsigned long i=0 ; i < nick.length(); i++)
 	{
-		if(isalnum(nick[i]))
+		if(isalnum(nick[i]) || nick[i] == '}' || nick[i] == '{' || nick[i] == '[' || nick[i] ==']' || nick[i] =='|' || nick[i] == '\\')
+			continue;
+		else
+			return 1;
 	}
+	return 0;
 }
 
 void Client::set_msg(std::string newmsg)
@@ -41,6 +45,14 @@ int Client::get_fd()
 int Client::get_auth()
 {
 	return auth;
+}
+
+
+void Client::send_msg(std::string msg)
+{
+	const char* message = msg.c_str();
+	send(fd, message, strlen(message), 0);
+
 }
 
 void Client::set_auth(int auth)
@@ -84,7 +96,7 @@ Client & Client::operator=(const Client &obj)
 	{
 		nickname = obj.nickname;
 		username = obj.username;
-		user_type = obj.user_type;
+		// user_type = obj.user_type;
 		msg = obj.msg;
 		fd = obj.fd;
 		auth = obj.auth;

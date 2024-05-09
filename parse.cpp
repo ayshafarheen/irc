@@ -1,5 +1,18 @@
 #include "IRC.hpp"
 
+std::string trim(const std::string &str)
+{
+    std::string result = str;
+    std::string::iterator it = result.begin();
+
+    while (it != result.end() && (*it == ' ' || *it == '\t'))
+    {
+        ++it;
+    }
+    result.erase(result.begin(), it);
+    return result;
+}
+
 std::vector<std::string> ft_split_whitespace(const std::string &str)
 {
     std::vector<std::string> words;
@@ -87,19 +100,26 @@ void Server::command_user_parsing(const std::string &args, Client client)
 	// 	send(client.get_fd(), message, strlen(message), 0);
 	// 	close(client.get_fd());
     // }
+	(void) args;
 	if (client.get_nick() != "" && auth_clients.find(client.get_nick()) != auth_clients.end())
 	{
-		std::cerr << ERR_ALREADYREGISTERED(client.get_nick());
+		client.send_msg(ERR_ALREADYREGISTERED(client.get_nick()));
 	}
 }
+
+// int invalid_nick(std::string nick)
+// {
+
+// }
+
 
 void Server::command_nick_parsing(const std::string &args, Client client)
 {
 	std::string nick = trim(args);
 	if(nick == "")
-		std::cerr << ERR_NONICKNAMEGIVEN(client.get_nick());
-	else if(invalid_nick(nick))
-		std::cerr << ERR_ERRONEUSNICKNAME(client.get_user(), client.get_nick());
+		client.send_msg(ERR_NONICKNAMEGIVEN(client.get_nick()));
+	else if(Client::invalid_nick(nick))
+		client.send_msg( ERR_ERRONEUSNICKNAME(client.get_user(), client.get_nick()));
     else if (auth_clients.find(nick) == auth_clients.end())
     {
         client.set_nick(nick);
@@ -109,8 +129,10 @@ void Server::command_nick_parsing(const std::string &args, Client client)
     else {
         clients.erase(std::to_string(client.get_fd()));
 		FD_CLR(client.get_fd(), &current_sockets);
-		const char* message = (ERR_NICKNAMEINUSE(client.get_user(), client.get_nick())).c_str();
-		send(client.get_fd(), message, strlen(message), 0);
+		// std::string msg = ERR_NICKNAMEINUSE(client.get_user(), client.get_nick());
+		// const char* message = msg.c_str();
+		// send(client.get_fd(), message, strlen(message), 0);
+		client.send_msg(ERR_NICKNAMEINUSE(client.get_user(), client.get_nick()));
 		close(client.get_fd());
     }
 }
@@ -132,18 +154,6 @@ void Server::command_pass_parsing(const std::string &args, Client client)
 // Typedef for function pointers
 typedef void (Server::*CommandFunction)(const std::string &args, Client client);
 
-std::string trim(const std::string &str)
-{
-    std::string result = str;
-    std::string::iterator it = result.begin();
-
-    while (it != result.end() && (*it == ' ' || *it == '\t'))
-    {
-        ++it;
-    }
-    result.erase(result.begin(), it);
-    return result;
-}
 
 void Server::parse_and_execute_client_command(const std::string &clientmsg, Client client)
 {

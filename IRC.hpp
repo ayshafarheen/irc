@@ -29,7 +29,7 @@ class Client
 {
 	std::string nickname;
 	std::string username;
-	std::string user_type;
+	// std::string user_type;
 	std::string msg;
 	int auth;
 	int fd;
@@ -37,6 +37,7 @@ class Client
 	public:
 	void set_msg(std::string);
 	void set_auth(int auth);
+	void send_msg(std::string msg);
 	std::string get_msg();
 	int get_fd();
 	Client(const Client &obj);
@@ -49,7 +50,7 @@ class Client
 	void set_nick(std::string nick);
 	std::string get_user();
 	void set_user(std::string user);
-	int invalid_nick(std::string);
+	static int invalid_nick(std::string);
 };
 
 class Server
