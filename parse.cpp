@@ -87,24 +87,13 @@ void Server::command_mode_parsing(const std::string &args, Client client)
 
 void Server::command_user_parsing(const std::string &args, Client client)
 {
-    // if (auth_clients.find(args) == auth_clients.end())
-    // {
-    //     client.set_user(args);
-    //     if(client.get_auth() && client.get_nick() != "")
-    //         auth_clients[args] = clients[std::to_string(client.get_fd())];
-    // }
-    // else {
-    //     clients.erase(std::to_string(client.get_fd()));
-	// 	FD_CLR(client.get_fd(), &current_sockets);
-	// 	const char* message = "Client exists!\n";
-	// 	send(client.get_fd(), message, strlen(message), 0);
-	// 	close(client.get_fd());
-    // }
 	(void) args;
 	if (client.get_nick() != "" && auth_clients.find(client.get_nick()) != auth_clients.end())
 	{
 		client.send_msg(ERR_ALREADYREGISTERED(client.get_nick()));
 	}
+	else
+		client.set_user(trim(args));
 }
 
 // int invalid_nick(std::string nick)
@@ -129,9 +118,6 @@ void Server::command_nick_parsing(const std::string &args, Client client)
     else {
         clients.erase(std::to_string(client.get_fd()));
 		FD_CLR(client.get_fd(), &current_sockets);
-		// std::string msg = ERR_NICKNAMEINUSE(client.get_user(), client.get_nick());
-		// const char* message = msg.c_str();
-		// send(client.get_fd(), message, strlen(message), 0);
 		client.send_msg(ERR_NICKNAMEINUSE(client.get_user(), client.get_nick()));
 		close(client.get_fd());
     }
