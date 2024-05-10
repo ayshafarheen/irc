@@ -38,20 +38,22 @@ class Client
 	void set_msg(std::string);
 	void set_auth(int auth);
 	void send_msg(std::string msg);
-	std::string get_msg();
-	int get_fd();
+	std::string get_msg() const;
+	int get_fd() const;
 	Client(const Client &obj);
 	Client &operator=(const Client &obj);
 	static void create_client();
 	Client();
 	Client(int socket);
-	int get_auth();
-	std::string get_nick();
+	int get_auth() const;
+	std::string get_nick() const;
 	void set_nick(std::string nick);
-	std::string get_user();
+	std::string get_user() const;
 	void set_user(std::string user);
 	static int invalid_nick(std::string);
 };
+
+std::ostream& operator<<(std::ostream& out, const Client &client);
 
 class Server
 {
@@ -62,14 +64,15 @@ class Server
 	std::map<std::string, Client> clients;
 	std::map<std::string, Client> auth_clients;
 	static std::string password;
-	void command_quit_parsing(const std::string &args, Client client);
-	void command_join_parsing(const std::string &args, Client client);
-	void command_kick_parsing(const std::string &args, Client client);
-	void command_invite_parsing(const std::string &args, Client client);
-	void command_mode_parsing(const std::string &args, Client client);
-	void command_user_parsing(const std::string &args, Client client);
-	void command_nick_parsing(const std::string &args, Client client);
-	void command_pass_parsing(const std::string &args, Client client);
+	void command_quit_parsing(const std::string &args, Client &client);
+	void command_join_parsing(const std::string &args, Client &client);
+	void command_kick_parsing(const std::string &args, Client &client);
+	void command_invite_parsing(const std::string &args, Client &client);
+	void command_mode_parsing(const std::string &args, Client &client);
+	void command_user_parsing(const std::string &args, Client &client);
+	void command_nick_parsing(const std::string &args, Client &client);
+	void command_pass_parsing(const std::string &args, Client &client);
+	void authenticate(Client client);
 	int port;
 	fd_set current_sockets;
 	std::string msg;
@@ -86,7 +89,7 @@ class Server
 	void check_message();
 	// void command_pass_parsing(const std::string &args, Client client);
 	// static void set_pass(std::string pass);
-	void parse_and_execute_client_command(const std::string &clientmsg, Client client);
+	void parse_and_execute_client_command(const std::string &clientmsg, Client &client);
 };
 
 //commands

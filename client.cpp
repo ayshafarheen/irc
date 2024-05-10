@@ -4,7 +4,6 @@ Client::Client(int socket)
 {
 	nickname = "";
 	username = "";
-	// user_type = "";
 	msg = "";
 	fd = socket;
 	auth = 0;
@@ -14,7 +13,6 @@ Client::Client()
 {
 	nickname = "";
 	username = "";
-	// user_type = "";
 	msg = "";
 	fd = -1;
 	auth = 0;
@@ -37,12 +35,12 @@ void Client::set_msg(std::string newmsg)
 	msg = newmsg;
 }
 
-int Client::get_fd()
+int Client::get_fd() const
 {
 	return fd;
 }
 
-int Client::get_auth()
+int Client::get_auth() const
 {
 	return auth;
 }
@@ -60,12 +58,12 @@ void Client::set_auth(int auth)
 	this->auth = auth;
 }
 
-std::string Client::get_msg()
+std::string Client::get_msg() const
 {
 	return msg;
 }
 
-std::string Client::get_nick()
+std::string Client::get_nick() const
 {
 	return nickname;
 }
@@ -80,7 +78,7 @@ void Client::set_user(std::string user)
 	username = user;
 }
 
-std::string Client::get_user()
+std::string Client::get_user() const
 {
 	return username;
 }
@@ -96,10 +94,14 @@ Client & Client::operator=(const Client &obj)
 	{
 		nickname = obj.nickname;
 		username = obj.username;
-		// user_type = obj.user_type;
 		msg = obj.msg;
 		fd = obj.fd;
 		auth = obj.auth;
 	}
 	return *this;
+}
+
+std::ostream& operator<<(std::ostream& out, const Client &client)
+{
+	return out << client.get_auth() << " " << client.get_nick() << " " << client.get_user() << "\n";
 }

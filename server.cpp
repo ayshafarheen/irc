@@ -51,6 +51,15 @@ void Server::set_server()
 	}
 }
 
+void Server::authenticate(Client client)
+{
+	if(client.get_user() != "" && client.get_nick() != "" && client.get_auth())
+	{
+		auth_clients[client.get_nick()] = clients[std::to_string(client.get_fd())];
+		client.send_msg(RPL_WELCOME(std::to_string(client.get_fd()), client.get_nick()));
+	}
+}
+
 void Server::handle_connection(int clientSocket)
 {
 	int fail;
@@ -67,7 +76,7 @@ void Server::handle_connection(int clientSocket)
 	}
 	*strchr(buffer, '\n') = 0;
 	msg = buffer;
-	Client client = clients[std::to_string(clientSocket)];
+	Client &client = clients[std::to_string(clientSocket)];
 	client.set_msg(buffer);
 	std::cout << "Message from client " << client.get_fd() << ": " << client.get_msg() << std::endl;
 	parse_and_execute_client_command(client.get_msg(), client);

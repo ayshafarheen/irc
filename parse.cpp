@@ -51,49 +51,51 @@ std::string first_word(const std::string &str)
 }
 
 // QUIT :Leaving IRC
-void Server::command_quit_parsing(const std::string &args, Client client)
+void Server::command_quit_parsing(const std::string &args, Client &client)
 {
     std::cout << "PARSE [" << args << "]" << std::endl;
 	(void)client;
 }
 
 // JOIN #chatroom1,#chatroom2
-void Server::command_join_parsing(const std::string &args, Client client)
+void Server::command_join_parsing(const std::string &args, Client &client)
 {
     (void)args;
 	(void)client;
 }
 
 // KICK #chatroom1 user123 :You are kicked!
-void Server::command_kick_parsing(const std::string &args, Client client)
+void Server::command_kick_parsing(const std::string &args, Client &client)
 {
     (void)args;
 	(void)client;
 }
 
 // INVITE user123 #chatroom1
-void Server::command_invite_parsing(const std::string &args, Client client)
+void Server::command_invite_parsing(const std::string &args, Client &client)
 {
     (void)args;
 	(void)client;
 }
 
 // MODE #chatroom1 +o user123
-void Server::command_mode_parsing(const std::string &args, Client client)
+void Server::command_mode_parsing(const std::string &args, Client &client)
 {
     (void)args;
 	(void)client;
 }
 
-void Server::command_user_parsing(const std::string &args, Client client)
+void Server::command_user_parsing(const std::string &args, Client &client)
 {
-	(void) args;
 	if (client.get_nick() != "" && auth_clients.find(client.get_nick()) != auth_clients.end())
 	{
 		client.send_msg(ERR_ALREADYREGISTERED(client.get_nick()));
 	}
 	else
+	{
 		client.set_user(trim(args));
+		authenticate(client);
+	}
 }
 
 // int invalid_nick(std::string nick)
@@ -102,7 +104,7 @@ void Server::command_user_parsing(const std::string &args, Client client)
 // }
 
 
-void Server::command_nick_parsing(const std::string &args, Client client)
+void Server::command_nick_parsing(const std::string &args, Client &client)
 {
 	std::string nick = trim(args);
 	if(nick == "")
@@ -112,8 +114,7 @@ void Server::command_nick_parsing(const std::string &args, Client client)
     else if (auth_clients.find(nick) == auth_clients.end())
     {
         client.set_nick(nick);
-        if(client.get_auth() && client.get_user() != "")
-            auth_clients[nick] = clients[std::to_string(client.get_fd())];
+        authenticate(client);
     }
     else {
         clients.erase(std::to_string(client.get_fd()));
@@ -123,7 +124,7 @@ void Server::command_nick_parsing(const std::string &args, Client client)
     }
 }
 
-void Server::command_pass_parsing(const std::string &args, Client client)
+void Server::command_pass_parsing(const std::string &args, Client &client)
 {
 	if(args != Server::get_pass())
 	{
@@ -134,14 +135,17 @@ void Server::command_pass_parsing(const std::string &args, Client client)
 		close(client.get_fd());
 	}
 	else
+	{
 		client.set_auth(1);
+		authenticate(client);
+	}
 }
 
 // Typedef for function pointers
-typedef void (Server::*CommandFunction)(const std::string &args, Client client);
+typedef void (Server::*CommandFunction)(const std::string &args, Client &client);
 
 
-void Server::parse_and_execute_client_command(const std::string &clientmsg, Client client)
+void Server::parse_and_execute_client_command(const std::string &clientmsg, Client &client)
 {
     std::vector<std::string> words;
     std::string command_name;
@@ -167,6 +171,8 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
     if (commandMap.find(command_name) != commandMap.end())
     {
         (this->*(commandMap[command_name]))(trim(clientmsg.substr(command_name.length())), client);
+		std::cout << "Client ";
+		std::cout << client;
     }
     else
     {
