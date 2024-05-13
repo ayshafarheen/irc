@@ -31,7 +31,6 @@ class Channel
 	std::string topic;
 	typedef std::map<std::string, Client *>::iterator ite;
 	std::vector<int> clients;
-	std::string topic;
 	std::map<std::string, Client *> joined;
 	std::map<std::string, Client *> banned;
 	bool					isOper;

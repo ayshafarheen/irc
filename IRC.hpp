@@ -73,6 +73,7 @@ class Server
 	int maxfd;
 	std::map<std::string, Client> clients;
 	std::map<std::string, Client> auth_clients;
+	std::list<std::string> channels;
 	static std::string password;
 	void command_quit_parsing(const std::string &args, Client &client);
 	void command_join_parsing(const std::string &args, Client &client);

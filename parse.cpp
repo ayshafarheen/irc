@@ -1,5 +1,10 @@
 #include "IRC.hpp"
 
+// std::string parse_channel(std::string chan)
+// {
+
+// }
+
 std::string trim(const std::string &str)
 {
     std::string result = str;
@@ -60,12 +65,19 @@ void Server::command_quit_parsing(const std::string &args, Client &client)
 // JOIN #chatroom1,#chatroom2
 void Server::command_join_parsing(const std::string &args, Client &client)
 {
+	std::string test = args;
+	if(test.length() == 0)
+	{
+		std::cout << "write something" << std::endl;
+		return ;
+	}
     std::string chan, str, pass;
     std::list<std::string> join;
     std::stringstream strm(args);
     strm.str(str);
     while (!strm.eof()){
         std::getline(strm, chan, ',');
+		// parse_channel(chan);
         join.push_back(chan);
     }
     if (args.size() > 1)
@@ -75,6 +87,8 @@ void Server::command_join_parsing(const std::string &args, Client &client)
     while (!join.empty())
     {
         chan = join.back();
+		std::cout << "help "<< chan << std::endl;
+		// Channel chanel(chan, client);
         
     }
     
