@@ -8,7 +8,7 @@ Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 	this->isOper = false;
 	this->isInv = false;
 	this->usrLim = -1;
-	std::cout << CYAN "hi channel: " << serv_name << "has been created" << std::endl;
+	std::cout <<  "hi channel: " << serv_name << "has been created" << std::endl;
 }
 
 Channel::~Channel(){

@@ -19,6 +19,7 @@
 #include <vector>
 #include "numericalReplies.hpp"
 #include "Channel.hpp"
+#include <ios>
 
 // class Channel 
 // {
@@ -105,12 +106,7 @@ class Server
 /*
 KICK
 INVITE
-TOPIC
-MODE
-	 Set/remove Invite-only channel
-	 Set/remove the restrictions of the TOPIC
-	 Set/remove the channel key
-	 Give/take channel operator privilege
+TOPIC;l
 	 Set/remove the user limit to channel
 USER
 NICK

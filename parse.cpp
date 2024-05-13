@@ -60,7 +60,25 @@ void Server::command_quit_parsing(const std::string &args, Client &client)
 // JOIN #chatroom1,#chatroom2
 void Server::command_join_parsing(const std::string &args, Client &client)
 {
-    (void)args;
+    std::string chan, str, pass;
+    std::list<std::string> join;
+    std::stringstream strm(args);
+    strm.str(str);
+    while (!strm.eof()){
+        std::getline(strm, chan, ',');
+        join.push_back(chan);
+    }
+    if (args.size() > 1)
+    {
+        pass = args[1];
+    }
+    while (!join.empty())
+    {
+        chan = join.back();
+        
+    }
+    
+    // (void)args;
 	(void)client;
 }
 
