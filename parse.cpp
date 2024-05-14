@@ -62,6 +62,12 @@ void Server::command_quit_parsing(const std::string &args, Client &client)
 	(void)client;
 }
 
+int validChan(std::string channame)
+{
+    if (channame.find("#") == 0)
+        return (1);
+    return (0);
+}
 // JOIN #chatroom1,#chatroom2
 void Server::command_join_parsing(const std::string &args, Client &client)
 {
@@ -77,7 +83,6 @@ void Server::command_join_parsing(const std::string &args, Client &client)
     itChan itr;
     while (!strm.eof()){
         std::getline(strm, chan, ',');
-		// parse_channel(chan);
         join.push_back(chan);
     }
     if (args.size() > 1)
@@ -90,8 +95,13 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 		std::cout << "help "<< chan << std::endl;
         join.pop_back();
 		itr = channels.find(chan);
-        if (itr == channels.end())
-            channels[chan] = Channel(chan, &client);
+        if (validChan(chan) == 1)
+        {
+             if (itr == channels.end())
+                channels[chan] = Channel(chan, &client);
+        }
+        else
+            client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 
     }
     
