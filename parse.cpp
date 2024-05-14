@@ -74,7 +74,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
     std::string chan, str, pass;
     std::list<std::string> join;
     std::stringstream strm(args);
-    strm.str(str);
+    itChan itr;
     while (!strm.eof()){
         std::getline(strm, chan, ',');
 		// parse_channel(chan);
@@ -88,12 +88,13 @@ void Server::command_join_parsing(const std::string &args, Client &client)
     {
         chan = join.back();
 		std::cout << "help "<< chan << std::endl;
-		// Channel chanel(chan, client);
-        
+        join.pop_back();
+		itr = channels.find(chan);
+        if (itr == channels.end())
+            channels[chan] = Channel(chan, &client);
+
     }
     
-    // (void)args;
-	(void)client;
 }
 
 // KICK #chatroom1 user123 :You are kicked!

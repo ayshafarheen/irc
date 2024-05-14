@@ -24,6 +24,7 @@
 
 class Client;
 
+
 class Channel
 {
 	private:
@@ -43,6 +44,7 @@ class Channel
 	
 
 	public:
+			Channel();
 			Channel(std::string serv_name, Client *maker);
 			~Channel();
 			void addMember();

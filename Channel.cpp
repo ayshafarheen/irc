@@ -1,5 +1,10 @@
 #include "Channel.hpp"
 
+Channel::Channel()
+{
+
+}
+
 Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 {
 	topic = "[NULL]";
@@ -11,7 +16,8 @@ Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 	std::cout <<  "hi channel: " << serv_name << "has been created" << std::endl;
 }
 
-Channel::~Channel(){
+Channel::~Channel()
+{
 
 }
 

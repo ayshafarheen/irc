@@ -20,21 +20,9 @@
 #include "numericalReplies.hpp"
 #include "Channel.hpp"
 #include <ios>
-
-// class Channel 
-// {
-// 	// typedef std::map<std::string, Client *>::iterator ite;
-
-// 	std::vector<int> clients;
-// 	// std::string topic;
-// 	// std::map<std::string, Client *> joined
+#include "Commands.hpp"
 
 
-
-// };
-// class Channel;
-
-#define CYAN "\x1B[36m";
 class Client
 {
 	std::string nickname;
@@ -65,6 +53,7 @@ class Client
 
 std::ostream& operator<<(std::ostream& out, const Client &client);
 
+class Channel;
 class Server
 {
 	private:
@@ -73,8 +62,9 @@ class Server
 	int maxfd;
 	std::map<std::string, Client> clients;
 	std::map<std::string, Client> auth_clients;
-	std::list<std::string> channels;
+	std::map<std::string, Channel> channels;
 	static std::string password;
+	typedef std::map<std::string, Channel>::iterator itChan;
 	void command_quit_parsing(const std::string &args, Client &client);
 	void command_join_parsing(const std::string &args, Client &client);
 	void command_kick_parsing(const std::string &args, Client &client);
