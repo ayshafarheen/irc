@@ -23,7 +23,7 @@
 #include <stdbool.h>
 
 class Client;
-
+class Server;
 
 class Channel
 {
@@ -47,7 +47,7 @@ class Channel
 			Channel();
 			Channel(std::string serv_name, Client *maker);
 			~Channel();
-			void addMember();
+			void addMember(Client *member);
 			std::string	getServName();
 			std::string getTopic();
 			

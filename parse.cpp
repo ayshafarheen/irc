@@ -66,6 +66,12 @@ int validChan(std::string channame)
 {
     if (channame.find("#") == 0)
         return (1);
+	else if (channame.find("!") == 0)
+		return (1);
+	else if (channame.find("&") == 0)
+		return (1);
+	else if (channame.find("+") == 0)
+		return (1);
     return (0);
 }
 // JOIN #chatroom1,#chatroom2
@@ -99,6 +105,8 @@ void Server::command_join_parsing(const std::string &args, Client &client)
         {
              if (itr == channels.end())
                 channels[chan] = Channel(chan, &client);
+			else
+				channels[chan].addMember(&client);
         }
         else
             client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
