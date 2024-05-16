@@ -141,6 +141,34 @@ void Server::command_pass_parsing(const std::string &args, Client &client)
 	}
 }
 
+void Server::command_cap_parsing(const std::string &args, Client &client)
+{
+	// (void) args;(void) client;
+	// args[strlen(args.c_str()) - 1] = 0;
+	// std::cout << "---"<<args <<"---\n";
+	// std::cout << "---"<<std::string("LS 302\n") <<"---\n";
+	// // std::cout << "??"<< args.length()<< "??" <<std::string("\nLS 302\n").length() << (args == std::string("\nLS 302\n"));
+	// if(args.compare("\nLS 302\n") == 0)
+	// {
+	// 	std::cout << "!!";
+	// (void) args;
+	// std::cout << "?\n";
+	// 	client.send_msg("CAP * LS :multi-prefix sasl");
+	// }
+	if(first_word(args) == "LS")
+	{
+		// std::cout << "??\n";
+		client.send_msg("CAP * LS :multi-prefix\n");
+	}
+	else if(first_word(args) == "REQ")
+	{
+		client.send_msg("CAP * ACK :multi-prefix\n");
+		// std::cout << "!!\n";
+	}
+	else
+		return ;
+}
+
 // Typedef for function pointers
 typedef void (Server::*CommandFunction)(const std::string &args, Client &client);
 
@@ -151,6 +179,8 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
     std::string command_name;
     std::map<std::string, CommandFunction> commandMap;
 
+	commandMap.insert(std::make_pair("CAP", &Server::command_cap_parsing));
+	// commandMap.insert(std::make_pair("CAP", &Server::command_cap_parsing));
     commandMap.insert(std::make_pair("QUIT", &Server::command_quit_parsing));
     commandMap.insert(std::make_pair("JOIN", &Server::command_join_parsing));
     commandMap.insert(std::make_pair("KICK", &Server::command_kick_parsing));
@@ -159,6 +189,7 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 	commandMap.insert(std::make_pair("USER", &Server::command_user_parsing));
     commandMap.insert(std::make_pair("NICK", &Server::command_nick_parsing));
 	commandMap.insert(std::make_pair("PASS", &Server::command_pass_parsing));
+	// commandMap.insert(std::make_pair("CAP LS", &Server::command_cap));
 
     command_name = first_word(clientmsg);
     if (command_name.empty())
@@ -170,12 +201,13 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
     // Call the function associated with the command name
     if (commandMap.find(command_name) != commandMap.end())
     {
+		// std::cout << "COMMAND NAME : " << command_name << std::endl;
+		// std::cout << "ARGS : " << trim(clientmsg.substr(command_name.length())) << std::endl;
         (this->*(commandMap[command_name]))(trim(clientmsg.substr(command_name.length())), client);
-		std::cout << "Client ";
-		std::cout << client;
     }
     else
     {
+		std::cout << command_name << std::endl;
         // TODO: change the message
         std::cerr << "Error: Unsupported command" << std::endl;
     }

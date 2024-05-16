@@ -69,6 +69,7 @@ class Server
 	void command_kick_parsing(const std::string &args, Client &client);
 	void command_invite_parsing(const std::string &args, Client &client);
 	void command_mode_parsing(const std::string &args, Client &client);
+	void command_cap_parsing(const std::string &args, Client &client);
 	void command_user_parsing(const std::string &args, Client &client);
 	void command_nick_parsing(const std::string &args, Client &client);
 	void command_pass_parsing(const std::string &args, Client &client);
