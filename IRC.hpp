@@ -18,12 +18,10 @@
 #include <netdb.h>
 #include <vector>
 #include "numericalReplies.hpp"
+#include "Channel.hpp"
+#include <ios>
+#include "Commands.hpp"
 
-class Channel
-{
-	std::vector<int> clients;
-	std::string topic;
-};
 
 class Client
 {
@@ -53,8 +51,10 @@ class Client
 	static int invalid_nick(std::string);
 };
 
+
 std::ostream& operator<<(std::ostream& out, const Client &client);
 
+class Channel;
 class Server
 {
 	private:
@@ -63,7 +63,9 @@ class Server
 	int maxfd;
 	std::map<std::string, Client> clients;
 	std::map<std::string, Client> auth_clients;
+	std::map<std::string, Channel> channels;
 	static std::string password;
+	typedef std::map<std::string, Channel>::iterator itChan;
 	void command_quit_parsing(const std::string &args, Client &client);
 	void command_join_parsing(const std::string &args, Client &client);
 	void command_kick_parsing(const std::string &args, Client &client);
@@ -91,18 +93,14 @@ class Server
 	// void command_pass_parsing(const std::string &args, Client client);
 	// static void set_pass(std::string pass);
 	void parse_and_execute_client_command(const std::string &clientmsg, Client &client);
+	std::vector<std::string> ft_split(const std::string &str, char delimiter);
 };
 
 //commands
 /*
 KICK
 INVITE
-TOPIC
-MODE
-	 Set/remove Invite-only channel
-	 Set/remove the restrictions of the TOPIC
-	 Set/remove the channel key
-	 Give/take channel operator privilege
+TOPIC;l
 	 Set/remove the user limit to channel
 USER
 NICK
