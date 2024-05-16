@@ -6,11 +6,9 @@
 #    By: afarheen <afarheen@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/11/07 08:53:04 by afarheen          #+#    #+#              #
-#    Updated: 2024/05/16 10:15:34 by afarheen         ###   ########.fr        #
+#    Updated: 2024/05/16 10:22:10 by afarheen         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
-
-
 
 NAME = ircserv
 
@@ -19,7 +17,10 @@ MY_SOURCES = main.cpp server.cpp client.cpp parse.cpp Channel.cpp
 MY_OBJS = $(MY_SOURCES:.cpp=.o)
 
 CXXFLAGS =  -Wall -Wextra -Werror -g
-CXXFLAGS =  -Wall -Wextra -Werror  -g
+
+CXX = c++
+
+all: $(NAME)
 
 $(NAME): $(MY_OBJS)
 	$(CXX) $(CXXFLAGS) $(MY_SOURCES) -o $(NAME)
