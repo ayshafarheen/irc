@@ -98,7 +98,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
     while (!join.empty())
     {
         chan = join.back();
-		std::cout << "help "<< chan << std::endl;
+		// std::cout << "help "<< chan << std::endl;
         join.pop_back();
 		itr = channels.find(chan);
         if (validChan(chan) == 1)
@@ -112,7 +112,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
             client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 
     }
-    
+
 }
 
 // KICK #chatroom1 user123 :You are kicked!
@@ -181,9 +181,9 @@ void Server::command_pass_parsing(const std::string &args, Client &client)
 	{
 		clients.erase(std::to_string(client.get_fd()));
 		FD_CLR(client.get_fd(), &current_sockets);
-		const char* message = "Incorrect password!\n";
-		send(client.get_fd(), message, strlen(message), 0);
-		close(client.get_fd());
+		client.send_msg("Incorrect password!\n");
+		std::cout << "password : " << args << " " << args.length() << "!" << std::endl;
+		std::cout << "password : " << Server::get_pass() << " " << Server::get_pass().length() << "!" << std::endl;
 	}
 	else
 	{
@@ -209,11 +209,11 @@ void Server::command_cap_parsing(const std::string &args, Client &client)
 	if(first_word(args) == "LS")
 	{
 		// std::cout << "??\n";
-		client.send_msg("CAP * LS :multi-prefix\n");
+		client.send_msg("CAP * LS :multi-prefix sasl\r\n");
 	}
 	else if(first_word(args) == "REQ")
 	{
-		client.send_msg("CAP * ACK :multi-prefix\n");
+		client.send_msg("CAP * ACK :multi-prefix\r\n");
 		// std::cout << "!!\n";
 	}
 	else
@@ -241,25 +241,30 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
     commandMap.insert(std::make_pair("NICK", &Server::command_nick_parsing));
 	commandMap.insert(std::make_pair("PASS", &Server::command_pass_parsing));
 	// commandMap.insert(std::make_pair("CAP LS", &Server::command_cap));
-
-    command_name = first_word(clientmsg);
-    if (command_name.empty())
-    {
-        // No command / invalid
-        // TODO: print something
-        return;
-    }
-    // Call the function associated with the command name
-    if (commandMap.find(command_name) != commandMap.end())
-    {
-		// std::cout << "COMMAND NAME : " << command_name << std::endl;
-		// std::cout << "ARGS : " << trim(clientmsg.substr(command_name.length())) << std::endl;
-        (this->*(commandMap[command_name]))(trim(clientmsg.substr(command_name.length())), client);
-    }
-    else
-    {
-		std::cout << command_name << std::endl;
-        // TODO: change the message
-        std::cerr << "Error: Unsupported command" << std::endl;
-    }
+	std::vector<std::string> commands = ft_split(clientmsg, '\n');
+	// std::vector commands = ft_split(clientmsg, '\n');
+	for (unsigned long i = 0; i < commands.size() ; i++)
+	{
+		std::cout << "Command is:  " << commands[i] << std::endl;
+		command_name = first_word(commands[i]);
+		if (command_name.empty())
+		{
+			// No command / invalid
+			// TODO: print something
+			return;
+		}
+		// Call the function associated with the command name
+		if (commandMap.find(command_name) != commandMap.end())
+		{
+			// std::cout << "COMMAND NAME : " << command_name << std::endl;
+			// std::cout << "ARGS : " << trim(commands[i].substr(command_name.length())) << std::endl;
+			// std::cout << "here?"<<command_name << std::endl;
+			(this->*(commandMap[command_name]))(trim(commands[i].substr(command_name.length())), client);
+		}
+		else
+		{
+			// TODO: change the message
+			std::cerr << "Error: Unsupported command" << std::endl;
+		}
+	}
 }

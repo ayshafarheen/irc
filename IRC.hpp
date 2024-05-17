@@ -93,8 +93,8 @@ class Server
 	// void command_pass_parsing(const std::string &args, Client client);
 	// static void set_pass(std::string pass);
 	void parse_and_execute_client_command(const std::string &clientmsg, Client &client);
-	std::vector<std::string> ft_split(const std::string &str, char delimiter);
 };
+	// std::vector<std::string> ft_split(coknst std::string &str, char delimiter);
 
 //commands
 /*
