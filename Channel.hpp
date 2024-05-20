@@ -50,6 +50,7 @@ class Channel
 			void addMember(Client *member);
 			std::string	getServName();
 			std::string getTopic();
+			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
 			
 
 };

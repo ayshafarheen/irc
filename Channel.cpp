@@ -43,4 +43,25 @@ void	Channel::addMember(Client *member)
 		else
 			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
 	}
+	sendToAll(*member, "", "JOIN", true);
 }
+
+std::string	Channel::sendToAll(Client &client, std::string msg, std::string cmd, bool chan)
+{
+	std::string userInfo = client.get_nick() + "!" + client.get_user() + "@" + "localhost";
+	std::string fullmsg = ":" + userInfo + " " + cmd;
+	if (chan)
+		fullmsg += " " + this->name;
+	// if (msg.at(0)!= ':')
+	fullmsg += msg + "\n";
+	std::map<std::string, Client *> sent;
+	for (ite it = joined.begin(); it != joined.end(); ++it){
+		Client *member = it->second;
+		// if (member->get_nick() != client.get_nick() && sent.find(member->get_nick()) == sent.end()){
+			member->send_msg(fullmsg);
+			// sent[member->get_nick()] = member;
+		// }
+	}
+	return (fullmsg);
+}
+

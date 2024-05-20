@@ -104,15 +104,16 @@ void Server::command_join_parsing(const std::string &args, Client &client)
         if (validChan(chan) == 1)
         {
              if (itr == channels.end())
+             {
                 channels[chan] = Channel(chan, &client);
+             }
 			else
 				channels[chan].addMember(&client);
         }
         else
             client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 
-    }
-    
+    }   
 }
 
 // KICK #chatroom1 user123 :You are kicked!
