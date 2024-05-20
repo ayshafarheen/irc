@@ -29,6 +29,9 @@ class Client
 	std::string username;
 	// std::string user_type;
 	std::string msg;
+	std::string hostname;
+	std::string servername;
+	std::string realname;
 	int auth;
 	int fd;
 
@@ -45,6 +48,12 @@ class Client
 	Client(int socket);
 	int get_auth() const;
 	std::string get_nick() const;
+	void set_hostname(std::string newmsg);
+	void set_servername(std::string newmsg);
+	void set_realname(std::string newmsg);
+	std::string get_hostname() const;
+	std::string get_servername() const;
+	std::string get_realname() const;
 	void set_nick(std::string nick);
 	std::string get_user() const;
 	void set_user(std::string user);
@@ -70,6 +79,7 @@ class Server
 	void command_join_parsing(const std::string &args, Client &client);
 	void command_kick_parsing(const std::string &args, Client &client);
 	void command_invite_parsing(const std::string &args, Client &client);
+	void command_ping_parsing(const std::string &args, Client &client);
 	void command_mode_parsing(const std::string &args, Client &client);
 	void command_cap_parsing(const std::string &args, Client &client);
 	void command_user_parsing(const std::string &args, Client &client);

@@ -2,15 +2,22 @@
 
 Client::Client(int socket)
 {
+	char _hostname[1024];
 	nickname = "";
 	username = "";
 	msg = "";
 	fd = socket;
 	auth = 0;
+
+	gethostname(_hostname, 1024);
+	hostname = (std::string)_hostname;
 }
 
 Client::Client()
 {
+	char _hostname[1024];
+	gethostname(_hostname, 1024);
+	hostname = (std::string)_hostname;
 	nickname = "";
 	username = "";
 	msg = "";
@@ -35,6 +42,21 @@ void Client::set_msg(std::string newmsg)
 	msg = newmsg;
 }
 
+void Client::set_hostname(std::string newmsg)
+{
+	hostname = newmsg;
+}
+
+void Client::set_servername(std::string newmsg)
+{
+	servername = newmsg;
+}
+
+void Client::set_realname(std::string newmsg)
+{
+	realname = newmsg;
+}
+
 int Client::get_fd() const
 {
 	return fd;
@@ -49,7 +71,6 @@ int Client::get_auth() const
 void Client::send_msg(std::string msg)
 {
 	const char* message = msg.c_str();
-	// std::cout << "SERVER MESSAGE@!!!! " << message << std::endl;
 	send(fd, message, strlen(message), 0);
 }
 
@@ -83,6 +104,21 @@ std::string Client::get_user() const
 	return username;
 }
 
+std::string Client::get_hostname() const
+{
+	return hostname;
+}
+
+std::string Client::get_servername() const
+{
+	return servername;
+}
+
+std::string Client::get_realname() const
+{
+	return realname;
+}
+
 Client::Client(const Client &obj)
 {
 	*this = obj;
@@ -92,6 +128,9 @@ Client & Client::operator=(const Client &obj)
 {
 	if(this != &obj)
 	{
+		char _hostname[1024];
+		gethostname(_hostname, 1024);
+		hostname = (std::string)_hostname;
 		nickname = obj.nickname;
 		username = obj.username;
 		msg = obj.msg;

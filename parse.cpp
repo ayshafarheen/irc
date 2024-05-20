@@ -10,11 +10,18 @@ std::string trim(const std::string &str)
     std::string result = str;
     std::string::iterator it = result.begin();
 
-    while (it != result.end() && (*it == ' ' || *it == '\t'))
+    while (it != result.end() && isspace(*it))
     {
         ++it;
     }
     result.erase(result.begin(), it);
+	it = result.end() - 1;
+	while (it != result.begin() && isspace(*it))
+    {
+        it--;
+    }
+	if(it != result.end() - 1)
+		result.erase(it + 1, result.end());
     return result;
 }
 
@@ -98,7 +105,6 @@ void Server::command_join_parsing(const std::string &args, Client &client)
     while (!join.empty())
     {
         chan = join.back();
-		// std::cout << "help "<< chan << std::endl;
         join.pop_back();
 		itr = channels.find(chan);
         if (validChan(chan) == 1)
@@ -144,24 +150,53 @@ void Server::command_user_parsing(const std::string &args, Client &client)
 	}
 	else
 	{
-		client.set_user(trim(args));
+		std::vector<std::string> parts = ft_split(args, ':');
+		if(parts.size() != 2)
+		{
+			client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER"));
+			return ;
+		}
+		std::string username, hostname, servername, realname;
+		std::vector<std::string> args_sp = ft_split(parts[0], ' ');
+		if(!args_sp[0].empty())
+		{
+			username = args_sp[0];
+			if(!args_sp[1].empty())
+			{
+				hostname = args_sp[1];
+				if(!args_sp[2].empty())
+				{
+					servername = args_sp[2];
+					realname = parts[1];
+					if(!args_sp[3].empty()){
+			std::cout << "??\n";
+						client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER"));}
+				}
+				else
+					client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER"));
+			}
+			else
+				client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER"));
+		}
+		client.set_user(username);
+		client.set_servername(servername);
+		client.set_realname(realname);
 		authenticate(client);
 	}
 }
 
-// int invalid_nick(std::string nick)
-// {
-
-// }
-
 
 void Server::command_nick_parsing(const std::string &args, Client &client)
 {
-	std::string nick = trim(args);
-	if(nick == "")
+	std::string nick = args;
+	if(nick.empty())
+	{
 		client.send_msg(ERR_NONICKNAMEGIVEN(client.get_nick()));
+	}
 	else if(Client::invalid_nick(nick))
+	{
 		client.send_msg( ERR_ERRONEUSNICKNAME(client.get_user(), client.get_nick()));
+	}
     else if (auth_clients.find(nick) == auth_clients.end())
     {
         client.set_nick(nick);
@@ -171,7 +206,6 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
         clients.erase(std::to_string(client.get_fd()));
 		FD_CLR(client.get_fd(), &current_sockets);
 		client.send_msg(ERR_NICKNAMEINUSE(client.get_user(), client.get_nick()));
-		close(client.get_fd());
     }
 }
 
@@ -194,30 +228,22 @@ void Server::command_pass_parsing(const std::string &args, Client &client)
 
 void Server::command_cap_parsing(const std::string &args, Client &client)
 {
-	// (void) args;(void) client;
-	// args[strlen(args.c_str()) - 1] = 0;
-	// std::cout << "---"<<args <<"---\n";
-	// std::cout << "---"<<std::string("LS 302\n") <<"---\n";
-	// // std::cout << "??"<< args.length()<< "??" <<std::string("\nLS 302\n").length() << (args == std::string("\nLS 302\n"));
-	// if(args.compare("\nLS 302\n") == 0)
-	// {
-	// 	std::cout << "!!";
-	// (void) args;
-	// std::cout << "?\n";
-	// 	client.send_msg("CAP * LS :multi-prefix sasl");
-	// }
 	if(first_word(args) == "LS")
 	{
-		// std::cout << "??\n";
 		client.send_msg("CAP * LS :multi-prefix sasl\r\n");
 	}
 	else if(first_word(args) == "REQ")
 	{
 		client.send_msg("CAP * ACK :multi-prefix\r\n");
-		// std::cout << "!!\n";
 	}
 	else
 		return ;
+}
+
+void Server::command_ping_parsing(const std::string &args, Client &client)
+{
+	(void) args;
+	client.send_msg("PONG");
 }
 
 // Typedef for function pointers
@@ -231,18 +257,19 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
     std::map<std::string, CommandFunction> commandMap;
 
 	commandMap.insert(std::make_pair("CAP", &Server::command_cap_parsing));
-	// commandMap.insert(std::make_pair("CAP", &Server::command_cap_parsing));
-    commandMap.insert(std::make_pair("QUIT", &Server::command_quit_parsing));
-    commandMap.insert(std::make_pair("JOIN", &Server::command_join_parsing));
-    commandMap.insert(std::make_pair("KICK", &Server::command_kick_parsing));
-    commandMap.insert(std::make_pair("INVITE", &Server::command_invite_parsing));
-    commandMap.insert(std::make_pair("MODE", &Server::command_mode_parsing));
 	commandMap.insert(std::make_pair("USER", &Server::command_user_parsing));
     commandMap.insert(std::make_pair("NICK", &Server::command_nick_parsing));
 	commandMap.insert(std::make_pair("PASS", &Server::command_pass_parsing));
-	// commandMap.insert(std::make_pair("CAP LS", &Server::command_cap));
+    commandMap.insert(std::make_pair("QUIT", &Server::command_quit_parsing));
+	if(client.get_auth())
+	{
+    	commandMap.insert(std::make_pair("JOIN", &Server::command_join_parsing));
+		commandMap.insert(std::make_pair("KICK", &Server::command_kick_parsing));
+		commandMap.insert(std::make_pair("INVITE", &Server::command_invite_parsing));
+		commandMap.insert(std::make_pair("MODE", &Server::command_mode_parsing));
+		commandMap.insert(std::make_pair("PING", &Server::command_ping_parsing));
+	}
 	std::vector<std::string> commands = ft_split(clientmsg, '\n');
-	// std::vector commands = ft_split(clientmsg, '\n');
 	for (unsigned long i = 0; i < commands.size() ; i++)
 	{
 		std::cout << "Command is:  " << commands[i] << std::endl;
@@ -256,12 +283,9 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 		// Call the function associated with the command name
 		if (commandMap.find(command_name) != commandMap.end())
 		{
-			// std::cout << "COMMAND NAME : " << command_name << std::endl;
-			// std::cout << "ARGS : " << trim(commands[i].substr(command_name.length())) << std::endl;
-			// std::cout << "here?"<<command_name << std::endl;
 			(this->*(commandMap[command_name]))(trim(commands[i].substr(command_name.length())), client);
 		}
-		else
+		else if(!client.get_nick().empty() && auth_clients.find(client.get_nick()) == auth_clients.end())
 		{
 			// TODO: change the message
 			std::cerr << "Error: Unsupported command" << std::endl;
