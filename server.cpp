@@ -74,11 +74,11 @@ void Server::handle_connection(int clientSocket)
 		FD_CLR(clientSocket, &current_sockets);
 		return;
 	}
-	*strchr(buffer, '\n') = 0;
+	// *strchr(buffer, '\n') = 0;
 	msg = buffer;
 	Client &client = clients[std::to_string(clientSocket)];
 	client.set_msg(buffer);
-	std::cout << "Message from client " << client.get_fd() << ": " << client.get_msg() << std::endl;
+	// std::cout << "Message from client " << client.get_fd() << ": " << client.get_msg()  << std::endl;
 	parse_and_execute_client_command(client.get_msg(), client);
 }
 
