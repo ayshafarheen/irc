@@ -108,7 +108,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
              {
                 channels[chan] = Channel(chan, &client);
              }
-			else if (!channels[chan].getUsrLim() > 0 && channels[chan].getSize() >= channels[chan].getUsrLim())
+			else if (!(channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
 				client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
 			if (channels[chan].getKey() != pass)
 				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
