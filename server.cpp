@@ -133,6 +133,7 @@ void Server::accept_connections()
 				{
 					clientSocket = accept_new_connection(server);
 					FD_SET(clientSocket, &current_sockets);
+					std::cout << clientSocket;
 				}
 				else
 				{

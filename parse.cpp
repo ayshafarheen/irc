@@ -187,25 +187,32 @@ void Server::command_user_parsing(const std::string &args, Client &client)
 
 void Server::command_nick_parsing(const std::string &args, Client &client)
 {
-	std::string nick = args;
-	if(nick.empty())
+	if (client.get_nick() != "" && auth_clients.find(client.get_nick()) != auth_clients.end())
 	{
-		client.send_msg(ERR_NONICKNAMEGIVEN(client.get_nick()));
+		client.send_msg(ERR_ALREADYREGISTERED(client.get_nick()));
 	}
-	else if(Client::invalid_nick(nick))
+	else
 	{
-		client.send_msg( ERR_ERRONEUSNICKNAME(client.get_user(), client.get_nick()));
+		std::string nick = args;
+		if(nick.empty())
+		{
+			client.send_msg(ERR_NONICKNAMEGIVEN(client.get_nick()));
+		}
+		else if(Client::invalid_nick(nick))
+		{
+			client.send_msg( ERR_ERRONEUSNICKNAME(client.get_user(), client.get_nick()));
+		}
+		else if (auth_clients.find(nick) == auth_clients.end())
+		{
+			client.set_nick(nick);
+			authenticate(client);
+		}
+		else {
+			// std::cout << "???????????????????????????????\n";
+			client.send_msg(ERR_NICKNAMEINUSE(std::to_string(client.get_fd()), client.get_nick()));
+			// clients.erase(std::to_string(client.get_fd()));
+		}
 	}
-    else if (auth_clients.find(nick) == auth_clients.end())
-    {
-        client.set_nick(nick);
-        authenticate(client);
-    }
-    else {
-		// std::cout << "???????????????????????????????\n";
-		client.send_msg(ERR_NICKNAMEINUSE(client.get_nick(), client.get_nick()));
-        // clients.erase(std::to_string(client.get_fd()));
-    }
 }
 
 void Server::command_pass_parsing(const std::string &args, Client &client)
@@ -213,9 +220,9 @@ void Server::command_pass_parsing(const std::string &args, Client &client)
 	if(args != Server::get_pass())
 	{
 		client.send_msg("Incorrect password!\n");
+		// clients.erase(std::to_string(client.get_fd()));
 		FD_CLR(client.get_fd(), &current_sockets);
-		clients.erase(std::to_string(client.get_fd()));
-		throw(1);
+		// close(client.get_fd());
 	}
 	else
 	{
