@@ -2,7 +2,6 @@
 
 Channel::Channel()
 {
-
 }
 
 Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
@@ -18,7 +17,6 @@ Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 
 Channel::~Channel()
 {
-
 }
 
 std::string Channel::getServName()
@@ -50,14 +48,14 @@ std::string Channel::getKey()
 	return key;
 }
 
-void	Channel::addMember(Client *member)
+void Channel::addMember(Client *member)
 {
 	ite iter;
 	for (iter = joined.begin(); iter != joined.end(); iter++)
 	{
 		if (joined.find(member->get_nick()) != joined.end())
 		{
-			member->send_msg(ERR_USERONCHANNEL(member->get_user(),member->get_nick(), this->getServName()));
+			member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getServName()));
 		}
 		else
 			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
@@ -65,7 +63,7 @@ void	Channel::addMember(Client *member)
 	sendToAll(*member, "", "JOIN", true);
 }
 
-std::string	Channel::sendToAll(Client &client, std::string msg, std::string cmd, bool chan)
+std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd, bool chan)
 {
 	std::string userInfo = client.get_nick() + "!" + client.get_user() + "@" + "localhost";
 	std::string fullmsg = ":" + userInfo + " " + cmd;
@@ -74,12 +72,32 @@ std::string	Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 	// if (msg.at(0)!= ':')
 	fullmsg += msg + "\n";
 	std::map<std::string, Client *> sent;
-	for (ite it = joined.begin(); it != joined.end(); ++it){
+	for (ite it = joined.begin(); it != joined.end(); ++it)
+	{
 		Client *member = it->second;
 		// if (member->get_nick() != client.get_nick() && sent.find(member->get_nick()) == sent.end()){
-			member->send_msg(fullmsg);
-			// sent[member->get_nick()] = member;
+		member->send_msg(fullmsg);
+		// sent[member->get_nick()] = member;
 		// }
 	}
 	return (fullmsg);
+}
+
+void Channel::kickMember(Client *member, const std::string &reason)
+{
+	ite iter = joined.find(member->get_nick());
+	if (iter != joined.end())
+	{
+		// Notify the member that they have been kicked
+		member->send_msg("You have been kicked from the channel. Reason: " + reason);
+		// Notify all other members in the channel about the kick
+		sendToAll(*member, reason, "KICK", true);
+		// Remove the member from the channel
+		joined.erase(iter);
+	}
+	else
+	{
+		// Member is not in the channel, send an error message
+		member->send_msg("Error: You are not a member of this channel.");
+	}
 }
