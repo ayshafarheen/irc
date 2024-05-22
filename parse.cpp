@@ -144,7 +144,8 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan));
 		else
 		{
-			if ()
+			if (channels[chan].isInChan(to_invite) == 0)
+				client.send_msg()
 		}
 		return ;
 	}

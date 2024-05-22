@@ -48,11 +48,17 @@ std::string Channel::getKey()
 	return key;
 }
 
-bool	Channel::isInChan(Client *member)
+bool	Channel::isInChan(std::string member)
 {
-	ite itr = joined.find(member->get_nick());
-	if (itr == joined.end())
-		member->send_msg(ERR_USERNOTINCHANNEL())
+
+	for (ite itr = joined.find(member); itr != joined.end(); itr++)
+	{
+		if (itr == joined.end())
+		{
+			return 1;
+		}
+	}
+		return 0;
 }
 
 void	Channel::setOper(Client *member)
