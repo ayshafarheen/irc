@@ -101,3 +101,4 @@ void Channel::kickMember(Client *member, const std::string &reason)
 		member->send_msg("Error: You are not a member of this channel.");
 	}
 }
+}
