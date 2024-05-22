@@ -34,13 +34,16 @@ class Client
 	std::string realname;
 	int auth;
 	int fd;
+	bool isOper;
 
 	public:
+	void	set_oper(bool oper);
 	void set_msg(std::string);
 	void set_auth(int auth);
 	void send_msg(std::string msg);
 	std::string get_msg() const;
 	int get_fd() const;
+	bool getOper();
 	Client(const Client &obj);
 	Client &operator=(const Client &obj);
 	static void create_client();

@@ -34,9 +34,10 @@ class Channel
 	std::vector<int> clients;
 	std::map<std::string, Client *> joined;
 	std::map<std::string, Client *> banned;
-	bool					isOper;
+	std::map<std::string, Client *> opers;
 	bool					isInv;
 	bool					hasPass;
+	bool					topRestrict;
 	int 					usrLim;
 
 

@@ -8,6 +8,7 @@ Client::Client(int socket)
 	msg = "";
 	fd = socket;
 	auth = 0;
+	isOper = false;
 
 	gethostname(_hostname, 1024);
 	hostname = (std::string)_hostname;
@@ -23,6 +24,7 @@ Client::Client()
 	msg = "";
 	fd = -1;
 	auth = 0;
+	isOper = false;
 }
 
 int Client::invalid_nick(std::string nick)
@@ -37,6 +39,10 @@ int Client::invalid_nick(std::string nick)
 	return 0;
 }
 
+void	Client::set_oper(bool oper)
+{
+	isOper = oper;
+}
 void Client::set_msg(std::string newmsg)
 {
 	msg = newmsg;
@@ -55,6 +61,11 @@ void Client::set_servername(std::string newmsg)
 void Client::set_realname(std::string newmsg)
 {
 	realname = newmsg;
+}
+
+bool Client::getOper()
+{
+	return isOper;
 }
 
 int Client::get_fd() const

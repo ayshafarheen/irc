@@ -9,9 +9,9 @@ Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 {
 	topic = "[NULL]";
 	joined.insert(std::pair<std::string, Client *>(maker->get_nick(), maker));
-	this->isOper = false;
 	this->isInv = false;
 	this->hasPass = false;
+	this->topRestrict = false;
 	this->usrLim = -1;
 	maker->send_msg(RPL_JOIN(maker->get_nick(), serv_name));
 }
