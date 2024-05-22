@@ -78,6 +78,7 @@ class Server
 	std::map<std::string, Channel> channels;
 	static std::string password;
 	typedef std::map<std::string, Channel>::iterator itChan;
+	typedef std::map<std::string, Client>::iterator itCli;
 	void command_quit_parsing(const std::string &args, Client &client);
 	void command_join_parsing(const std::string &args, Client &client);
 	void command_kick_parsing(const std::string &args, Client &client);

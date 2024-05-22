@@ -49,6 +49,7 @@ class Channel
 			Channel(std::string serv_name, Client *maker);
 			~Channel();
 			void addMember(Client *member);
+			void setOper(Client *member);
 			std::string	getServName();
 			std::string getTopic();
 			int 		getUsrLim();
@@ -56,6 +57,7 @@ class Channel
 			std::string getKey();
 			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
 			void kickMember(Client *member, const std::string &reason);
+			bool isInChan(Client *member);
 			
 
 };

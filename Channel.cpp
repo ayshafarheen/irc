@@ -48,6 +48,39 @@ std::string Channel::getKey()
 	return key;
 }
 
+bool	Channel::isInChan(Client *member)
+{
+	ite itr = joined.find(member->get_nick());
+	if (itr == joined.end())
+		member->send_msg(ERR_USERNOTINCHANNEL())
+}
+
+void	Channel::setOper(Client *member)
+{
+	if (opers.empty()){
+		member->set_oper(true);
+		opers.insert(std::pair<std::string, Client *>(member->get_nick(), member));
+		member->send_msg(RPL_YOUREOPER(member->get_nick()));
+	}
+	else if (!opers.empty())
+	{
+		for(ite opIt = opers.begin(); opIt != opers.end(); ++opIt)
+		{
+			if (opers.find(member->get_nick()) != opers.end())
+			{
+				member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getServName()));
+			}
+			else
+			{
+				opers.insert(std::pair<std::string, Client *>(member->get_nick(), member));
+				member->send_msg(RPL_YOUREOPER(member->get_nick()));
+				member->set_oper(true);
+			}
+		}
+	}
+}
+
+
 void Channel::addMember(Client *member)
 {
 	ite iter;
@@ -100,5 +133,4 @@ void Channel::kickMember(Client *member, const std::string &reason)
 		// Member is not in the channel, send an error message
 		member->send_msg("Error: You are not a member of this channel.");
 	}
-}
 }
