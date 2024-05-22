@@ -88,6 +88,8 @@ class Server
 	void command_user_parsing(const std::string &args, Client &client);
 	void command_nick_parsing(const std::string &args, Client &client);
 	void command_pass_parsing(const std::string &args, Client &client);
+	void command_part_parsing(const std::string &args, Client &client);
+
 	void authenticate(Client client);
 	int port;
 	fd_set current_sockets;

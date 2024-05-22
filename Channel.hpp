@@ -30,6 +30,7 @@ class Channel
 	private:
 	std::string name;
 	std::string topic;
+	std::string				key;
 	typedef std::map<std::string, Client *>::iterator ite;
 	std::vector<int> clients;
 	std::map<std::string, Client *> joined;
@@ -41,7 +42,6 @@ class Channel
 	int 					usrLim;
 
 
-
 	
 
 	public:
@@ -51,6 +51,9 @@ class Channel
 			void addMember(Client *member);
 			std::string	getServName();
 			std::string getTopic();
+			int 		getUsrLim();
+			int 		getSize();
+			std::string getKey();
 			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
 			
 

@@ -30,6 +30,25 @@ std::string Channel::getTopic()
 {
 	return (this->topic);
 }
+int Channel::getUsrLim()
+{
+	return usrLim;
+}
+
+int Channel::getSize()
+{
+	int count = 0;
+	ite memIt;
+	for (memIt = joined.begin(); memIt != joined.end(); memIt++)
+	{
+		count++;
+	}
+	return count;
+}
+std::string Channel::getKey()
+{
+	return key;
+}
 
 void	Channel::addMember(Client *member)
 {
@@ -64,4 +83,3 @@ std::string	Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 	}
 	return (fullmsg);
 }
-

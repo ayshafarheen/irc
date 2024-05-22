@@ -1,10 +1,5 @@
 #include "IRC.hpp"
 
-// std::string parse_channel(std::string chan)
-// {
-
-// }
-
 std::string trim(const std::string &str)
 {
     std::string result = str;
@@ -109,10 +104,14 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 		itr = channels.find(chan);
         if (validChan(chan) == 1)
         {
-             if (itr == channels.end())
+            if (itr == channels.end())
              {
                 channels[chan] = Channel(chan, &client);
              }
+			else if (!channels[chan].getUsrLim() > 0 && channels[chan].getSize() >= channels[chan].getUsrLim())
+				client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
+			if (channels[chan].getKey() != pass)
+				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 			else
 				channels[chan].addMember(&client);
         }
@@ -120,7 +119,6 @@ void Server::command_join_parsing(const std::string &args, Client &client)
             client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 
     }
-
 }
 
 // KICK #chatroom1 user123 :You are kicked!
@@ -270,6 +268,8 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 		commandMap.insert(std::make_pair("INVITE", &Server::command_invite_parsing));
 		commandMap.insert(std::make_pair("MODE", &Server::command_mode_parsing));
 		commandMap.insert(std::make_pair("PING", &Server::command_ping_parsing));
+		commandMap.insert(std::make_pair("PART", &Server::command_ping_parsing));
+
 	}
 	std::vector<std::string> commands = ft_split(clientmsg, '\n');
 	for (unsigned long i = 0; i < commands.size() ; i++)
