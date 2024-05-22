@@ -37,6 +37,13 @@ void Server::set_server()
 		this->serverAddr.sin_family = AF_INET;		   // IPV4
 		this->serverAddr.sin_port = htons(port);	   // port number host to network
 		this->serverAddr.sin_addr.s_addr = INADDR_ANY; // dont bind to particular ip but listen for all available IPs
+			int opt = 1;
+				if (setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
+		{
+			std::cerr << "setsockopt(SO_REUSEADDR) failed\n";
+			close(server);
+			exit(0);
+    	}
 		fail = bind(server, (const sockaddr *)&(this->serverAddr), sizeof(this->serverAddr));
 		if (fail == -1)
 			throw(3);
@@ -56,7 +63,17 @@ void Server::authenticate(Client client)
 	if(client.get_user() != "" && client.get_nick() != "" && client.get_auth())
 	{
 		auth_clients[client.get_nick()] = clients[std::to_string(client.get_fd())];
-		client.send_msg(RPL_WELCOME(std::to_string(client.get_fd()), client.get_nick()));
+		char _hostname[1024];
+		std::string hostname;
+		gethostname(_hostname, 1024);
+		hostname = (std::string)_hostname;
+		time_t now = time(0);
+		char* date_time = ctime(&now);
+		std::string id = client.get_nick() + "@" + hostname;
+		client.send_msg(RPL_WELCOME(id, client.get_nick()));
+		client.send_msg(RPL_YOURHOST(client.get_nick(), hostname, "1.0"));
+		// client.send_msg(RPL_CREATED(client.get_nick(), hostname, "1.0"));
+		client.send_msg(RPL_CREATED(client.get_nick(), date_time));
 	}
 }
 
@@ -89,6 +106,7 @@ int Server::accept_new_connection(int server)
 	if (clientSocket > maxfd)
 		maxfd = clientSocket;
 	std::string val = std::to_string(clientSocket);
+	std::cout << "ADED!!\n";
 	clients[val] = client1;
 	return clientSocket;
 }

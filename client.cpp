@@ -29,7 +29,7 @@ int Client::invalid_nick(std::string nick)
 {
 	for(unsigned long i=0 ; i < nick.length(); i++)
 	{
-		if(isalnum(nick[i]) || nick[i] == '}' || nick[i] == '{' || nick[i] == '[' || nick[i] ==']' || nick[i] =='|' || nick[i] == '\\')
+		if(isalnum(nick[i]) || nick[i] == '}' || nick[i] == '_' || nick[i] == '{' || nick[i] == '[' || nick[i] ==']' || nick[i] =='|' || nick[i] == '\\')
 			continue;
 		else
 			return 1;
@@ -59,6 +59,7 @@ void Client::set_realname(std::string newmsg)
 
 int Client::get_fd() const
 {
+	// std::cout << fd << std::endl;
 	return fd;
 }
 
