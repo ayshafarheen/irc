@@ -31,7 +31,7 @@ int Client::invalid_nick(std::string nick)
 {
 	for(unsigned long i=0 ; i < nick.length(); i++)
 	{
-		if(isalnum(nick[i]) || nick[i] == '}' || nick[i] == '{' || nick[i] == '[' || nick[i] ==']' || nick[i] =='|' || nick[i] == '\\')
+		if(isalnum(nick[i]) || nick[i] == '}' || nick[i] == '_' || nick[i] == '{' || nick[i] == '[' || nick[i] ==']' || nick[i] =='|' || nick[i] == '\\')
 			continue;
 		else
 			return 1;
@@ -70,6 +70,7 @@ bool Client::getOper()
 
 int Client::get_fd() const
 {
+	// std::cout << fd << std::endl;
 	return fd;
 }
 
@@ -81,8 +82,11 @@ int Client::get_auth() const
 
 void Client::send_msg(std::string msg)
 {
+	std::cout << "Sending " << msg << "\n";
 	const char* message = msg.c_str();
-	send(fd, message, strlen(message), 0);
+	if(send(fd, message, strlen(message), 0) == -1)
+		std::cerr<< "Sending error!\n";
+
 }
 
 void Client::set_auth(int auth)

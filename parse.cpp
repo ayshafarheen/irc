@@ -221,7 +221,7 @@ void Server::command_user_parsing(const std::string &args, Client &client)
 		}
 		std::string username, hostname, servername, realname;
 		std::vector<std::string> args_sp = ft_split(parts[0], ' ');
-		if(!args_sp[0].empty())
+		if(!args_sp[0].empty() || args_sp.size() != 3)
 		{
 			username = args_sp[0];
 			if(!args_sp[1].empty())
@@ -231,9 +231,6 @@ void Server::command_user_parsing(const std::string &args, Client &client)
 				{
 					servername = args_sp[2];
 					realname = parts[1];
-					if(!args_sp[3].empty()){
-			std::cout << "??\n";
-						client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER"));}
 				}
 				else
 					client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER"));
@@ -251,36 +248,42 @@ void Server::command_user_parsing(const std::string &args, Client &client)
 
 void Server::command_nick_parsing(const std::string &args, Client &client)
 {
-	std::string nick = args;
-	if(nick.empty())
+	if (client.get_nick() != "" && auth_clients.find(client.get_nick()) != auth_clients.end())
 	{
-		client.send_msg(ERR_NONICKNAMEGIVEN(client.get_nick()));
+		client.send_msg(ERR_ALREADYREGISTERED(client.get_nick()));
 	}
-	else if(Client::invalid_nick(nick))
+	else
 	{
-		client.send_msg(ERR_ERRONEUSNICKNAME(client.get_user(), client.get_nick()));
+		std::string nick = args;
+		if(nick.empty())
+		{
+			client.send_msg(ERR_NONICKNAMEGIVEN(client.get_nick()));
+		}
+		else if(Client::invalid_nick(nick))
+		{
+			client.send_msg( ERR_ERRONEUSNICKNAME(client.get_nick(), client.get_nick()));
+		}
+		else if (auth_clients.find(nick) == auth_clients.end())
+		{
+			client.set_nick(nick);
+			authenticate(client);
+		}
+		else {
+			// client.send_msg("?????????????????????\r\n");
+			client.send_msg(ERR_NICKNAMEINUSE(client.get_user(), nick));
+			// clients.erase(std::to_string(client.get_fd()));
+		}
 	}
-    else if (auth_clients.find(nick) == auth_clients.end())
-    {
-        client.set_nick(nick);
-        authenticate(client);
-    }
-    else {
-        clients.erase(std::to_string(client.get_fd()));
-		FD_CLR(client.get_fd(), &current_sockets);
-		client.send_msg(ERR_NICKNAMEINUSE(client.get_user(), client.get_nick()));
-    }
 }
 
 void Server::command_pass_parsing(const std::string &args, Client &client)
 {
 	if(args != Server::get_pass())
 	{
-		clients.erase(std::to_string(client.get_fd()));
+		client.send_msg("Incorrect password!\r\n");
+		// clients.erase(std::to_string(client.get_fd()));
 		FD_CLR(client.get_fd(), &current_sockets);
-		client.send_msg("Incorrect password!\n");
-		std::cout << "password : " << args << " " << args.length() << "!" << std::endl;
-		std::cout << "password : " << Server::get_pass() << " " << Server::get_pass().length() << "!" << std::endl;
+		// close(client.get_fd());
 	}
 	else
 	{
@@ -306,7 +309,7 @@ void Server::command_cap_parsing(const std::string &args, Client &client)
 void Server::command_ping_parsing(const std::string &args, Client &client)
 {
 	(void) args;
-	client.send_msg("PONG");
+	client.send_msg("PONG\r\n");
 }
 
 // Typedef for function pointers
@@ -335,25 +338,36 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 
 	// }
 	std::vector<std::string> commands = ft_split(clientmsg, '\n');
-	for (unsigned long i = 0; i < commands.size() ; i++)
+	try
 	{
-		std::cout << "Command is:  " << commands[i] << std::endl;
-		command_name = first_word(commands[i]);
-		if (command_name.empty())
+		for (unsigned long i = 0; i < commands.size() ; i++)
 		{
-			// No command / invalid
-			// TODO: print something
-			return;
-		}
-		// Call the function associated with the command name
-		if (commandMap.find(command_name) != commandMap.end())
-		{
-			(this->*(commandMap[command_name]))(trim(commands[i].substr(command_name.length())), client);
-		}
-		else if(!client.get_nick().empty() && auth_clients.find(client.get_nick()) == auth_clients.end())
-		{
-			// TODO: change the message
-			std::cerr << "Error: Unsupported command" << std::endl;
+			//  std::cout << "Debug: commands[" << i << "] = " << commands[i] << std::endl;
+        std::cout << "Command is: " << commands[i]<< std::endl;
+
+			command_name = first_word(commands[i]);
+			if (command_name.empty())
+			{
+				// No command / invalid
+				// TODO: print something
+				return;
+			}
+			// Call the function associated with the command name
+			if (commandMap.find(command_name) != commandMap.end())
+			{
+				// std::cout << client << std::endl;
+				(this->*(commandMap[command_name]))(trim(commands[i].substr(command_name.length())), client);
+			}
+			else if(!client.get_nick().empty() && auth_clients.find(client.get_nick()) == auth_clients.end())
+			{
+				// TODO: change the message
+				std::cerr << "Error: Unsupported command" << std::endl;
+			}
 		}
 	}
+	catch(int n)
+	{
+		(void) n;
+	}
+
 }

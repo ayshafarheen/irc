@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <sstream>
 #include <ctime>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <vector>
 #include <cstring>
@@ -32,6 +33,7 @@ class Client
 	std::string hostname;
 	std::string servername;
 	std::string realname;
+	std::vector<std::string> msgs;
 	int auth;
 	int fd;
 	bool isOper;
