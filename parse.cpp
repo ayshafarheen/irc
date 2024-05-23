@@ -60,8 +60,7 @@ std::string first_word(const std::string &str)
 // QUIT :Leaving IRC
 void Server::command_quit_parsing(const std::string &args, Client &client)
 {
-    std::cout << "PARSE [" << args << "]" << std::endl;
-	(void)client;
+    commandQuit(&client, args);
 }
 
 int validChan(std::string channame)
@@ -76,6 +75,7 @@ int validChan(std::string channame)
 		return (1);
     return (0);
 }
+
 // JOIN #chatroom1,#chatroom2
 void Server::command_join_parsing(const std::string &args, Client &client)
 {
@@ -124,11 +124,56 @@ void Server::command_join_parsing(const std::string &args, Client &client)
     }
 }
 
+std::string ft_strjoin_iterator(std::vector<std::string >::iterator &ite, std::vector<std::string> &vec)
+{
+	std::ostringstream oss;
+	int i = 0;
+    const char* delimiter = " ";
+
+    for (;ite != vec.end(); ite++) 
+	{
+		if (i > 0) 
+		{
+            oss << delimiter;
+        }
+        oss << *ite;
+		i++;
+    }
+    return oss.str();
+}
+
 // KICK #chatroom1 user123 :You are kicked!
 void Server::command_kick_parsing(const std::string &args, Client &client)
 {
-    (void)args;
-	(void)client;
+	std::vector<std::string> vec = ft_split_whitespace(args);
+	std::vector<std::string >::iterator ite;
+	std::string chan_name;
+	itChan channel;
+	itCli useer;
+	std::string user_k;
+	std::string comments;
+
+	if (vec.size() < 2)
+		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "KICK"));
+	ite = vec.begin();
+	chan_name = *ite;
+	ite++;
+	user_k = *ite;
+	++ite;
+	if (vec.size() >= 3)
+		comments = ft_strjoin_iterator(ite, vec);
+	std::cout << chan_name << " " << user_k << " " << comments << std::endl;
+
+	// double check the channel if it is exist
+	channel = channels.find(chan_name);
+	if (channel->first != chan_name)
+		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan_name));
+	useer = clients.find(user_k);
+	if (useer->first != user_k)
+		return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_k, chan_name));
+	channel->second.kickMember(&useer->second, comments);
+	// std::cout << "CHANNEL: " << channel->first << std::endl; 
+	// std::cout << "CHANNEL: " << channel->second.getKey() << std::endl; 
 }
 
 // INVITE user123 #chatroom1
@@ -137,14 +182,14 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	std::string chan = &args[2]; 
 	std::string to_invite = &args[1];
 	itChan itr = channels.find(chan);
-	itCli itrC = clients.find(to_invite);
+	// itCli itrC = clients.find(to_invite);
 	if (client.getOper())
 	{
 		if (itr == channels.end())
 			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan));
 		else
 		{
-			if ()
+			// if ()
 		}
 		return ;
 	}
@@ -154,6 +199,8 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 // MODE #chatroom1 +o user123
 void Server::command_mode_parsing(const std::string &args, Client &client)
 {
+	std::string dest;
+	std::string user;
     (void)args;
 	(void)client;
 }
@@ -211,7 +258,7 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
 	}
 	else if(Client::invalid_nick(nick))
 	{
-		client.send_msg( ERR_ERRONEUSNICKNAME(client.get_user(), client.get_nick()));
+		client.send_msg(ERR_ERRONEUSNICKNAME(client.get_user(), client.get_nick()));
 	}
     else if (auth_clients.find(nick) == auth_clients.end())
     {

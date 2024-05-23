@@ -50,9 +50,11 @@ std::string Channel::getKey()
 
 bool	Channel::isInChan(Client *member)
 {
-	ite itr = joined.find(member->get_nick());
-	if (itr == joined.end())
-		member->send_msg(ERR_USERNOTINCHANNEL())
+	(void)member;
+	// ite itr = joined.find(member->get_nick());
+	// if (itr == joined.end())
+		// member->send_msg(ERR_USERNOTINCHANNEL())
+	return (true);
 }
 
 void	Channel::setOper(Client *member)
@@ -132,5 +134,15 @@ void Channel::kickMember(Client *member, const std::string &reason)
 	{
 		// Member is not in the channel, send an error message
 		member->send_msg("Error: You are not a member of this channel.");
+	}
+}
+
+void Channel::memberQuit(Client *member, const std::string &reason)
+{
+	ite iter = joined.find(member->get_nick());
+	if (iter != joined.end())
+	{
+		sendToAll(*member, reason, "QUIT", true);
+		joined.erase(iter);
 	}
 }

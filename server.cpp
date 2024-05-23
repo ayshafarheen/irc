@@ -152,3 +152,11 @@ std::string Server::get_pass()
 {
 	return password;
 }
+
+void Server::commandQuit(Client *member, const std::string reason)
+{
+	for (itChan ite = channels.begin(); ite != channels.end(); ite++)
+	{
+		ite->second.memberQuit(member, reason);
+	}
+}
