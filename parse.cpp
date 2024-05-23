@@ -200,7 +200,7 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
 		}
 		else if(Client::invalid_nick(nick))
 		{
-			client.send_msg( ERR_ERRONEUSNICKNAME(client.get_user(), client.get_nick()));
+			client.send_msg( ERR_ERRONEUSNICKNAME(client.get_nick(), client.get_nick()));
 		}
 		else if (auth_clients.find(nick) == auth_clients.end())
 		{
@@ -208,8 +208,8 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
 			authenticate(client);
 		}
 		else {
-			// std::cout << "???????????????????????????????\n";
-			client.send_msg(ERR_NICKNAMEINUSE(std::to_string(client.get_fd()), client.get_nick()));
+			// client.send_msg("?????????????????????\r\n");
+			client.send_msg(ERR_NICKNAMEINUSE(client.get_user(), nick));
 			// clients.erase(std::to_string(client.get_fd()));
 		}
 	}
@@ -219,7 +219,7 @@ void Server::command_pass_parsing(const std::string &args, Client &client)
 {
 	if(args != Server::get_pass())
 	{
-		client.send_msg("Incorrect password!\n");
+		client.send_msg("Incorrect password!\r\n");
 		// clients.erase(std::to_string(client.get_fd()));
 		FD_CLR(client.get_fd(), &current_sockets);
 		// close(client.get_fd());
@@ -248,7 +248,7 @@ void Server::command_cap_parsing(const std::string &args, Client &client)
 void Server::command_ping_parsing(const std::string &args, Client &client)
 {
 	(void) args;
-	client.send_msg("PONG");
+	client.send_msg("PONG\r\n");
 }
 
 // Typedef for function pointers
@@ -279,7 +279,9 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 	{
 		for (unsigned long i = 0; i < commands.size() ; i++)
 		{
-			std::cout << "Command is:  " << commands[i] << std::endl;
+			//  std::cout << "Debug: commands[" << i << "] = " << commands[i] << std::endl;
+        std::cout << "Command is: " << commands[i]<< std::endl;
+
 			command_name = first_word(commands[i]);
 			if (command_name.empty())
 			{

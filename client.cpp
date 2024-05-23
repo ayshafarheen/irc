@@ -71,8 +71,11 @@ int Client::get_auth() const
 
 void Client::send_msg(std::string msg)
 {
+	std::cout << "Sending " << msg << "\n";
 	const char* message = msg.c_str();
-	send(fd, message, strlen(message), 0);
+	if(send(fd, message, strlen(message), 0) == -1)
+		std::cerr<< "Sending error!\n";
+
 }
 
 void Client::set_auth(int auth)

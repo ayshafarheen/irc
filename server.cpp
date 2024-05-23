@@ -72,7 +72,6 @@ void Server::authenticate(Client client)
 		std::string id = client.get_nick() + "@" + hostname;
 		client.send_msg(RPL_WELCOME(id, client.get_nick()));
 		client.send_msg(RPL_YOURHOST(client.get_nick(), hostname, "1.0"));
-		// client.send_msg(RPL_CREATED(client.get_nick(), hostname, "1.0"));
 		client.send_msg(RPL_CREATED(client.get_nick(), date_time));
 	}
 }
@@ -80,8 +79,25 @@ void Server::authenticate(Client client)
 void Server::handle_connection(int clientSocket)
 {
 	int fail;
+	// int count, total;
+	// total = 0;
 
 	char buffer[1024] = {0};
+// 	while ((count = recv(clientSocket, &buffer[total], sizeof(buffer) - total, 0)) > 0)
+// {
+//     total += count;
+// 	// std::cout << buffer;
+//     // At this point the buffer is valid from 0..total-1, if that's enough then process it and break, otherwise continue
+// 	memset(buffer,0,1024);
+// }
+// if (count == -1)
+// {
+//     perror("recv");
+// }
+// else if (count == 0)
+// {
+//     // EOS on the socket: close it, exit the thread, etc.
+// }
 	fail = recv(clientSocket, buffer, sizeof(buffer), 0);
 	if (fail == -1)
 		throw(6);
@@ -91,15 +107,16 @@ void Server::handle_connection(int clientSocket)
 		FD_CLR(clientSocket, &current_sockets);
 		return;
 	}
-	msg = buffer;
 	Client &client = clients[std::to_string(clientSocket)];
 	client.set_msg(buffer);
 	parse_and_execute_client_command(client.get_msg(), client);
+	// msg = buffer;
 }
 
 int Server::accept_new_connection(int server)
 {
 	int clientSocket = accept(server, NULL, NULL);
+	 fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 	Client client1(clientSocket);
 	if (clientSocket == -1)
 		throw(5);
@@ -123,9 +140,9 @@ void Server::accept_connections()
 	{
 		// select changes the set passed in so we ned temporary copy
 		ready_sockets = current_sockets;
-		if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
+		if (select(maxfd +1, &ready_sockets, NULL, NULL, NULL) < 0)
 			throw(7);
-		for (int i = 0; i < FD_SETSIZE; i++)
+		for (int i = 0; i < maxfd +1; i++)
 		{
 			if (FD_ISSET(i, &ready_sockets))
 			{
@@ -133,7 +150,6 @@ void Server::accept_connections()
 				{
 					clientSocket = accept_new_connection(server);
 					FD_SET(clientSocket, &current_sockets);
-					std::cout << clientSocket;
 				}
 				else
 				{
