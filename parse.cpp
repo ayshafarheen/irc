@@ -196,13 +196,57 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan));
 }
 
+bool check_mode(std::string args)
+{
+	if (args == "+m")
+		return true;
+	if (args == "-m")
+		return true;
+	if (args == "+o")
+		return true;
+	if (args == "-o")
+		return true;
+	if (args == "+v")
+		return true;
+	if (args == "-v")
+		return true;
+	if (args == "+k")
+		return true;
+	if (args == "-k")
+		return true;
+	return false;
+}
+
 // MODE #chatroom1 +o user123
 void Server::command_mode_parsing(const std::string &args, Client &client)
 {
-	std::string dest;
-	std::string user;
-    (void)args;
-	(void)client;
+	std::vector<std::string> vec = ft_split_whitespace(args);
+	std::vector<std::string >::iterator ite;
+	std::string chan;
+	std::string user_m;
+	std::string mode;
+	itChan channel;
+	itCli useer;
+
+	if (vec.size() < 2)
+		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "MODE"));
+	ite = vec.begin();
+	chan = *ite;
+	ite++;
+	mode = *ite;
+	++ite;
+	if (vec.size() == 3)
+	{
+		user_m = *ite;
+		useer = clients.find(user_m);
+		if (useer->first != user_m)
+			return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_m, chan));
+	}
+	if (check_mode(mode) == false)
+		return client.send_msg(ERR_UMODEUNKNOWNFLAG(client.get_nick()));
+	channel = channels.find(chan);
+	if (channel->first != chan)
+		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan));
 }
 
 void Server::command_user_parsing(const std::string &args, Client &client)

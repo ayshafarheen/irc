@@ -115,6 +115,7 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 		// sent[member->get_nick()] = member;
 		// }
 	}
+	
 	return (fullmsg);
 }
 
@@ -140,6 +141,7 @@ void Channel::kickMember(Client *member, const std::string &reason)
 void Channel::memberQuit(Client *member, const std::string &reason)
 {
 	ite iter = joined.find(member->get_nick());
+
 	if (iter != joined.end())
 	{
 		sendToAll(*member, reason, "QUIT", true);
