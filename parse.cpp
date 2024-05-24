@@ -79,12 +79,6 @@ int validChan(std::string channame)
 // JOIN #chatroom1,#chatroom2
 void Server::command_join_parsing(const std::string &args, Client &client)
 {
-	std::string test = args;
-	if(test.length() == 0)
-	{
-		std::cout << "write something" << std::endl;
-		return ;
-	}
     std::string chan, str, pass;
     std::list<std::string> join;
     std::stringstream strm(args);
@@ -93,6 +87,11 @@ void Server::command_join_parsing(const std::string &args, Client &client)
         std::getline(strm, chan, ',');
         join.push_back(chan);
     }
+	if(args.length() == 0)
+	{
+		client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), args));
+		return ;
+	}
     if (args.size() > 1)
     {
         pass = args[1];
