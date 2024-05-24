@@ -58,8 +58,7 @@ class Channel
 			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
 			void kickMember(Client *member, const std::string &reason);
 			bool isInChan(std::string member);
-			
-
+	void memberQuit(Client *member, const std::string &reason);
 };
 
 #endif

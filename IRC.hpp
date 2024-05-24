@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <sstream>
 #include <ctime>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <vector>
 #include <cstring>
@@ -32,6 +33,7 @@ class Client
 	std::string hostname;
 	std::string servername;
 	std::string realname;
+	std::vector<std::string> msgs;
 	int auth;
 	int fd;
 	bool isOper;
@@ -106,11 +108,13 @@ class Server
 	void handle_connection(int clientsocket);
 	void accept_connections();
 	void check_message();
+	Channel getChannel(std::string chan_name);
 	// void command_pass_parsing(const std::string &args, Client client);
 	// static void set_pass(std::string pass);
 	void parse_and_execute_client_command(const std::string &clientmsg, Client &client);
+	void commandQuit(Client *member, const std::string reason);
 };
-	// std::vector<std::string> ft_split(coknst std::string &str, char delimiter);
+// std::vector<std::string> ft_split(coknst std::string &str, char delimiter);
 
 //commands
 /*
