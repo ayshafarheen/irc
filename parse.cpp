@@ -130,9 +130,9 @@ std::string ft_strjoin_iterator(std::vector<std::string >::iterator &ite, std::v
 	int i = 0;
     const char* delimiter = " ";
 
-    for (;ite != vec.end(); ite++) 
+    for (;ite != vec.end(); ite++)
 	{
-		if (i > 0) 
+		if (i > 0)
 		{
             oss << delimiter;
         }
@@ -154,7 +154,7 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 	std::string comments;
 
 	if (vec.size() < 2)
-		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "KICK"));
+		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "KICK", client.get_servername()));
 	ite = vec.begin();
 	chan_name = *ite;
 	ite++;
@@ -167,33 +167,33 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 	// double check the channel if it is exist
 	channel = channels.find(chan_name);
 	if (channel->first != chan_name)
-		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan_name));
+		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan_name, client.get_servername()));
 	useer = clients.find(user_k);
 	if (useer->first != user_k)
 		return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_k, chan_name));
 	channel->second.kickMember(&useer->second, comments);
-	// std::cout << "CHANNEL: " << channel->first << std::endl; 
-	// std::cout << "CHANNEL: " << channel->second.getKey() << std::endl; 
+	// std::cout << "CHANNEL: " << channel->first << std::endl;
+	// std::cout << "CHANNEL: " << channel->second.getKey() << std::endl;
 }
 
 // INVITE user123 #chatroom1
 void Server::command_invite_parsing(const std::string &args, Client &client)
-{	
-	std::string chan = &args[2]; 
+{
+	std::string chan = &args[2];
 	std::string to_invite = &args[1];
 	itChan itr = channels.find(chan);
 	// itCli itrC = clients.find(to_invite);
 	if (client.getOper())
 	{
 		if (itr == channels.end())
-			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan));
+			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
 		else
 		{
 			// if ()
 		}
 		return ;
 	}
-	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan));
+	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 }
 
 bool check_mode(std::string args)
@@ -229,7 +229,7 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 	itCli useer;
 
 	if (vec.size() < 2)
-		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "MODE"));
+		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "MODE", client.get_servername()));
 	ite = vec.begin();
 	chan = *ite;
 	ite++;
@@ -243,28 +243,28 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 			return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_m, chan));
 	}
 	if (check_mode(mode) == false)
-		return client.send_msg(ERR_UMODEUNKNOWNFLAG(client.get_nick()));
+		return client.send_msg(ERR_UMODEUNKNOWNFLAG(client.get_nick(), client.get_servername()));
 	channel = channels.find(chan);
 	if (channel->first != chan)
-		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan));
+		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
 }
 
 void Server::command_user_parsing(const std::string &args, Client &client)
 {
 	if (client.get_nick() != "" && auth_clients.find(client.get_nick()) != auth_clients.end())
 	{
-		client.send_msg(ERR_ALREADYREGISTERED(client.get_nick()));
+		client.send_msg(ERR_ALREADYREGISTERED(client.get_nick(), client.get_servername()));
 	}
 	else
 	{
 		std::vector<std::string> parts = ft_split(args, ':');
 		if(parts.size() != 2)
 		{
-			client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER"));
+			client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
 			return ;
 		}
 		std::string username, hostname, servername, realname;
-		std::vector<std::string> args_sp = ft_split(parts[0], ' ');
+		std::vector<std::string> args_sp = ft_split_whitespace(parts[0]);
 		if(!args_sp[0].empty() || args_sp.size() != 3)
 		{
 			username = args_sp[0];
@@ -277,10 +277,10 @@ void Server::command_user_parsing(const std::string &args, Client &client)
 					realname = parts[1];
 				}
 				else
-					client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER"));
+					client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
 			}
 			else
-				client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER"));
+				client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
 		}
 		client.set_user(username);
 		client.set_servername(servername);
@@ -292,20 +292,20 @@ void Server::command_user_parsing(const std::string &args, Client &client)
 
 void Server::command_nick_parsing(const std::string &args, Client &client)
 {
-	if (client.get_nick() != "" && auth_clients.find(client.get_nick()) != auth_clients.end())
+	if (auth_clients.find(client.get_nick()) != auth_clients.end())
 	{
-		client.send_msg(ERR_ALREADYREGISTERED(client.get_nick()));
+		client.send_msg(ERR_NICKNAMEINUSE(std::string("*"),client.get_nick(), client.get_servername()));
 	}
 	else
 	{
 		std::string nick = args;
 		if(nick.empty())
 		{
-			client.send_msg(ERR_NONICKNAMEGIVEN(client.get_nick()));
+			client.send_msg(ERR_NONICKNAMEGIVEN(client.get_nick(), client.get_servername()));
 		}
 		else if(Client::invalid_nick(nick))
 		{
-			client.send_msg( ERR_ERRONEUSNICKNAME(client.get_nick(), client.get_nick()));
+			client.send_msg( ERR_ERRONEUSNICKNAME(std::string("*"), client.get_nick(), client.get_servername()));
 		}
 		else if (auth_clients.find(nick) == auth_clients.end())
 		{
@@ -313,8 +313,7 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
 			authenticate(client);
 		}
 		else {
-			// client.send_msg("?????????????????????\r\n");
-			client.send_msg(ERR_NICKNAMEINUSE(client.get_user(), nick));
+			client.send_msg(ERR_NICKNAMEINUSE(std::string("*"), nick, client.get_servername()));
 			// clients.erase(std::to_string(client.get_fd()));
 		}
 	}
@@ -324,7 +323,7 @@ void Server::command_pass_parsing(const std::string &args, Client &client)
 {
 	if(args != Server::get_pass())
 	{
-		client.send_msg("Incorrect password!\r\n");
+		client.send_msg(ERR_PASSWDMISMATCH(std::string(""), client.get_servername()));
 		// clients.erase(std::to_string(client.get_fd()));
 		FD_CLR(client.get_fd(), &current_sockets);
 		// close(client.get_fd());
@@ -352,8 +351,9 @@ void Server::command_cap_parsing(const std::string &args, Client &client)
 
 void Server::command_ping_parsing(const std::string &args, Client &client)
 {
-	(void) args;
-	client.send_msg("PONG\r\n");
+	// (void) args;
+	std::string token = args.substr(args.find(":") + 1);
+	client.send_msg(RPL_PONG(client.get_servername(), token));
 }
 
 // Typedef for function pointers
@@ -371,8 +371,8 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
     commandMap.insert(std::make_pair("NICK", &Server::command_nick_parsing));
 	commandMap.insert(std::make_pair("PASS", &Server::command_pass_parsing));
     commandMap.insert(std::make_pair("QUIT", &Server::command_quit_parsing));
-	// if(client.get_auth())
-	// {
+	if(client.get_auth())
+	{
     	commandMap.insert(std::make_pair("JOIN", &Server::command_join_parsing));
 		commandMap.insert(std::make_pair("KICK", &Server::command_kick_parsing));
 		commandMap.insert(std::make_pair("INVITE", &Server::command_invite_parsing));
@@ -380,14 +380,14 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 		commandMap.insert(std::make_pair("PING", &Server::command_ping_parsing));
 		commandMap.insert(std::make_pair("PART", &Server::command_ping_parsing));
 
-	// }
+	}
 	std::vector<std::string> commands = ft_split(clientmsg, '\n');
 	try
 	{
 		for (unsigned long i = 0; i < commands.size() ; i++)
 		{
 			//  std::cout << "Debug: commands[" << i << "] = " << commands[i] << std::endl;
-        std::cout << "Command is: " << commands[i]<< std::endl;
+        // std::cout << "Command is: " << commands[i]<< std::endl;
 
 			command_name = first_word(commands[i]);
 			if (command_name.empty())

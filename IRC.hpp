@@ -33,6 +33,7 @@ class Client
 	std::string hostname;
 	std::string servername;
 	std::string realname;
+	std::string id;
 	std::vector<std::string> msgs;
 	int auth;
 	int fd;
@@ -55,8 +56,11 @@ class Client
 	std::string get_nick() const;
 	void set_hostname(std::string newmsg);
 	void set_servername(std::string newmsg);
+	void receive(int socket, fd_set &current_sockets);
+	void set_id(std::string newmsg);
 	void set_realname(std::string newmsg);
 	std::string get_hostname() const;
+	std::string get_id() const;
 	std::string get_servername() const;
 	std::string get_realname() const;
 	void set_nick(std::string nick);
@@ -93,7 +97,7 @@ class Server
 	void command_pass_parsing(const std::string &args, Client &client);
 	void command_part_parsing(const std::string &args, Client &client);
 
-	void authenticate(Client client);
+	void authenticate(Client &client);
 	int port;
 	fd_set current_sockets;
 	std::string msg;

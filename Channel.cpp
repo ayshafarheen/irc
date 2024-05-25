@@ -70,7 +70,7 @@ void	Channel::setOper(Client *member)
 		{
 			if (opers.find(member->get_nick()) != opers.end())
 			{
-				member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getServName()));
+				member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getServName(), member->get_servername()));
 			}
 			else
 			{
@@ -90,7 +90,7 @@ void Channel::addMember(Client *member)
 	{
 		if (joined.find(member->get_nick()) != joined.end())
 		{
-			member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getServName()));
+			member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getServName(), member->get_servername()));
 		}
 		else
 			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
@@ -115,7 +115,7 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 		// sent[member->get_nick()] = member;
 		// }
 	}
-	
+
 	return (fullmsg);
 }
 
