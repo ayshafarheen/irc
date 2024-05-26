@@ -104,7 +104,7 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 	std::string fullmsg = ":" + userInfo + " " + cmd;
 	if (chan)
 		fullmsg += " " + this->name;
-	// if (msg.at(0)!= ':')
+	if (msg.at(0)!= ':')
 	fullmsg += msg + "\n";
 	std::map<std::string, Client *> sent;
 	for (ite it = joined.begin(); it != joined.end(); ++it)

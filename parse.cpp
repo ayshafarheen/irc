@@ -181,17 +181,16 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	std::string chan = &args[2]; 
 	std::string to_invite = &args[1];
 	itChan itr = channels.find(chan);
-	// itCli itrC = clients.find(to_invite);
-	if (client.getOper())
+	itCli dest;
 	{
 		if (itr == channels.end())
 			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan));
-		else
-		{
-			if (channels[chan].isInChan(to_invite) == 0)
-				client.send_msg()
-		}
-		return ;
+		// else
+		// {
+		// 	if (channels[chan].isInChan(to_invite) == 0)
+		// 		client.send_msg()
+		// }
+		// return ;
 	}
 	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan));
 }
