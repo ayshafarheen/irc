@@ -113,6 +113,12 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 				client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
 			else if (!pass.empty() && channels[chan].getKey() != pass)
 				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
+			// pss needed for mode
+			else if(channels[chan].getPasswordNeeded() == true && pass.empty())
+				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
+			else if (channels[chan].getInviteOnlyMode() == true)
+				client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
+			// added because of the mode
 			else
 			{
 				channels[chan].addMember(&client);
@@ -171,6 +177,7 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 	useer = clients.find(user_k);
 	if (useer->first != user_k)
 		return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_k, chan_name));
+	// calling the function
 	channel->second.kickMember(&useer->second, comments);
 	// std::cout << "CHANNEL: " << channel->first << std::endl;
 	// std::cout << "CHANNEL: " << channel->second.getKey() << std::endl;
@@ -196,25 +203,48 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 }
 
+// if they have none of them than it's just a wrong flag
 bool check_mode(std::string args)
 {
-	if (args == "+m")
+	if (args == "+i")
 		return true;
-	if (args == "-m")
+	if (args == "-i")
 		return true;
-	if (args == "+o")
+	if (args == "+t")
 		return true;
-	if (args == "-o")
-		return true;
-	if (args == "+v")
-		return true;
-	if (args == "-v")
+	if (args == "-t")
 		return true;
 	if (args == "+k")
 		return true;
 	if (args == "-k")
 		return true;
+	if (args == "+o")
+		return true;
+	if (args == "-o")
+		return true;
 	return false;
+}
+
+// after the parsing checking then you just call one of them
+void	Channel::callModeFucntion(Client *member, std::string flag)
+{
+	if (flag == "+i")
+		this->setInviteOnlyMode(true);
+	if (flag == "-i")
+		this->setInviteOnlyMode(false);
+	if (flag == "+t")
+		this->setTopicMode(true);
+	if (flag == "-t")
+		this->setTopicMode(false);
+	if (flag == "+k")
+		this->setPasswordNeeded(true);
+	if (flag == "-k")
+		this->setPasswordNeeded(false);
+	if (flag == "+o")
+		this->setPrivilageMode(member, true);
+	if (flag == "-o")
+		this->setPrivilageMode(member, false);
+	
 }
 
 // MODE #chatroom1 +o user123
@@ -247,6 +277,8 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 	channel = channels.find(chan);
 	if (channel->first != chan)
 		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
+	// calling the function of mode
+	channel->second.callModeFucntion(&client, mode);
 }
 
 void handle_irssi(Client &client,std::vector<std::string> parts )
@@ -330,6 +362,10 @@ void Server::command_topic_parsing(const std::string &args, Client &client)
 			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(),args_sp[0], client.get_servername()));
 		else if(!channels[channel].isInChan(&client))
 			client.send_msg(ERR_NOTONCHANNEL(client.get_nick(),args_sp[0], client.get_servername()));
+		// checking if the mode is restricted or no
+		else if (channels[channel].getTopicMode() == true)
+			client.send_msg(ERR_NOTONCHANNEL(client.get_nick(),args_sp[0], client.get_servername()));
+		// havent got the correct reply but working
 		else if(args_sp.size() == 1)
 			if(channels[channel].getTopic() == "[NULL]")
 				client.send_msg(RPL_NOTOPIC(client.get_nick(),args_sp[0], client.get_servername()));

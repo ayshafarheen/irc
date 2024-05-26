@@ -12,11 +12,29 @@ Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 	this->hasPass = false;
 	this->topRestrict = false;
 	this->usrLim = -1;
+	this->inviteOnly = false;
+	this->topicMode = false;
+	this->passwordNeeded = false;
 	maker->send_msg(RPL_JOIN(maker->get_nick(), serv_name));
 }
 
 Channel::~Channel()
 {
+}
+
+bool	Channel::getInviteOnlyMode()
+{
+	return (this->inviteOnly);
+}
+
+bool	Channel::getTopicMode()
+{
+	return (this->topicMode);
+}
+
+bool	Channel::getPasswordNeeded()
+{
+	return (this->passwordNeeded);
 }
 
 std::string Channel::getServName()
