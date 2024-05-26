@@ -253,7 +253,7 @@ void handle_irssi(Client &client,std::vector<std::string> parts )
 {
 	if(parts.size() != 2)
 	{
-		client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
+		client.send_msg(ERR_NEEDMOREPARAMS((client.get_nick().empty() ? "*" : client.get_nick()), "USER", client.get_servername()));
 		return ;
 	}
 	std::string username, hostname, servername, realname;
@@ -271,19 +271,19 @@ void handle_irssi(Client &client,std::vector<std::string> parts )
 			}
 			else
 			{
-				client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
+				client.send_msg(ERR_NEEDMOREPARAMS((client.get_nick().empty() ? "*" : client.get_nick()), "USER", client.get_servername()));
 				return ;
 			}
 		}
 		else
 		{
-			client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
+			client.send_msg(ERR_NEEDMOREPARAMS((client.get_nick().empty() ? "*" : client.get_nick()), "USER", client.get_servername()));
 			return ;
 		}
 	}
 	else
 	{
-		client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
+		client.send_msg(ERR_NEEDMOREPARAMS((client.get_nick().empty() ? "*" : client.get_nick()), "USER", client.get_servername()));
 		return ;
 	}
 	client.set_user(username);
@@ -352,18 +352,18 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
 {
 	if (auth_clients.find(client.get_nick()) != auth_clients.end())
 	{
-		client.send_msg(ERR_NICKNAMEINUSE(std::string("*"),client.get_nick(), client.get_servername()));
+		client.send_msg(ERR_NICKNAMEINUSE((client.get_nick().empty() ? "*" : client.get_nick()),client.get_nick(), client.get_servername()));
 	}
 	else
 	{
 		std::string nick = args;
 		if(nick.empty())
 		{
-			client.send_msg(ERR_NONICKNAMEGIVEN(client.get_nick(), client.get_servername()));
+			client.send_msg(ERR_NONICKNAMEGIVEN((client.get_nick().empty() ? "*" : client.get_nick()), client.get_servername()));
 		}
 		else if(Client::invalid_nick(nick))
 		{
-			client.send_msg( ERR_ERRONEUSNICKNAME(std::string("*"), client.get_nick(), client.get_servername()));
+			client.send_msg( ERR_ERRONEUSNICKNAME((client.get_nick().empty() ? "*" : client.get_nick()), client.get_nick(), client.get_servername()));
 		}
 		else if (auth_clients.find(nick) == auth_clients.end())
 		{
@@ -371,7 +371,7 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
 			authenticate(client);
 		}
 		else {
-			client.send_msg(ERR_NICKNAMEINUSE(std::string("*"), nick, client.get_servername()));
+			client.send_msg(ERR_NICKNAMEINUSE((client.get_nick().empty() ? "*" : client.get_nick()), nick, client.get_servername()));
 			// clients.erase(std::to_string(client.get_fd()));
 		}
 	}
@@ -381,10 +381,10 @@ void Server::command_pass_parsing(const std::string &args, Client &client)
 {
 	if(args != Server::get_pass())
 	{
-		client.send_msg(ERR_PASSWDMISMATCH(std::string("*"), client.get_servername()));
+		client.send_msg(ERR_PASSWDMISMATCH((client.get_nick().empty() ? "*" : client.get_nick()), client.get_servername()));
 		FD_CLR(client.get_fd(), &current_sockets);
 		close(client.get_fd());
-		clients.erase(std::to_string(client.get_fd()));
+		clients.erase(to_string(client.get_fd()));
 		throw(1);
 	}
 	else
@@ -433,15 +433,46 @@ void Server::command_priv_parsing(const std::string &args, Client &client)
 		std::vector<std::string> receivers = ft_split(args_sp[0], ',');
 		for (std::vector<std::string>::iterator i = receivers.begin(); i != receivers.end(); ++i)
 		{
-			if(auth_clients.find(*i) != auth_clients.end())
-				auth_clients[*i].send_msg(args_sp[1]);
-			else if(channels.find(*i) != channels.end())
-				channels[*i].sendToAll(client, args_sp[1], "PRIVMSG", 1);
+			std::string msg = client.get_nick() + ": " + args_sp[1] + "\r\n";
+			if(auth_clients.find(trim(*i)) != auth_clients.end())
+				auth_clients[trim(*i)].send_msg(msg);
+			else if(channels.find(trim(*i)) != channels.end())
+				channels[trim(*i)].sendToAll(client, msg, "PRIVMSG", 1);
 			else
-				client.send_msg(ERR_NOSUCHNICK(client.get_nick(),std::string(*i)));
+				client.send_msg(ERR_NOSUCHNICK(client.get_nick(),std::string(trim(*i))));
 		}
 	}
 }
+
+// void Server::command_priv_parsing(const std::string &args, Client &client)
+// {
+// 	std::vector<std::string> args_sp = ft_split(args, ':');
+// 	if(args_sp.size() == 1)
+// 	{
+// 		if(args.find(':'))
+// 		{
+// 			if(args[args.length() - 1] == ':')
+// 				client.send_msg(ERR_NOTEXTTOSEND(client.get_nick()));
+// 			else
+// 				client.send_msg(ERR_NORECIPIENT(client.get_nick()));
+// 		}
+// 	}
+// 	else if(args_sp.size() == 2)
+// 	{
+// 		std::vector<std::string> receivers = ft_split(args_sp[0], ',');
+// 		for (std::vector<std::string>::iterator i = receivers.begin(); i != receivers.end(); ++i)
+// 		{
+// 			std::string msg = client.get_nick() + ": " + args_sp[1] + "\r\n";
+// 			if(auth_clients.find(trim(*i)) != auth_clients.end())
+// 				auth_clients[trim(*i)].send_msg(msg);
+// 			else if(channels.find(trim(*i)) != channels.end())
+// 				channels[trim(*i)].sendToAll(client, msg, "PRIVMSG", 1);
+// 			else
+// 				client.send_msg(ERR_NOSUCHNICK(client.get_nick(),std::string(trim(*i))));
+// 		}
+// 	}
+// }
+
 
 // Typedef for function pointers
 typedef void (Server::*CommandFunction)(const std::string &args, Client &client);

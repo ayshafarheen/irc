@@ -107,6 +107,7 @@ class Server
 	public:
 	void set_server();
 	static std::string get_pass();
+	std::string to_string(int b);
 	Server(char **argv);
 	static int get_server();
 	int accept_new_connection(int server);
