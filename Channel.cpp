@@ -24,6 +24,11 @@ std::string Channel::getServName()
 	return (this->name);
 }
 
+void Channel::setTopic(std::string top)
+{
+	topic = top;
+}
+
 std::string Channel::getTopic()
 {
 	return (this->topic);

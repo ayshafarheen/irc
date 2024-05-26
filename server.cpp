@@ -103,7 +103,7 @@ int Server::accept_new_connection(int server)
 	 fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 	std::string val = std::to_string(clientSocket);
 	clients[val] = client1;
-	std::cout << "Added new client: " << clientSocket << std::endl;
+	std::cout << "Accepted new connection: " << clients[val].get_hostname() << std::endl;
 
 	// for(std::map<std::string,Client >::const_iterator it = clients.begin();
     // it != clients.end(); ++it)
@@ -140,7 +140,6 @@ void Server::accept_connections()
 						if (clientSocket > maxfd) {
 							maxfd = clientSocket;
 						}
-						std::cout << "Accepted new connection: " << clientSocket << std::endl;
 					}
 				}
 				else
