@@ -58,7 +58,7 @@ void Server::set_server()
 	}
 }
 
-void Server::authenticate(Client client)
+void Server::authenticate(Client &client)
 {
 	if(client.get_user() != "" && client.get_nick() != "" && client.get_auth())
 	{
@@ -69,62 +69,47 @@ void Server::authenticate(Client client)
 		hostname = (std::string)_hostname;
 		time_t now = time(0);
 		char* date_time = ctime(&now);
-		std::string id = client.get_nick() + "@" + hostname;
-		client.send_msg(RPL_WELCOME(id, client.get_nick()));
-		client.send_msg(RPL_YOURHOST(client.get_nick(), hostname, "1.0"));
-		client.send_msg(RPL_CREATED(client.get_nick(), date_time));
+		client.set_id(client.get_nick() + "@" + hostname);
+		client.send_msg(RPL_WELCOME(client.get_id(), client.get_nick(), client.get_servername()));
+		client.send_msg(RPL_YOURHOST(client.get_nick(), hostname, "1.0", client.get_servername()));
+		client.send_msg(RPL_CREATED(client.get_nick(), date_time, client.get_servername()));
 	}
 }
 
+// ssize_t receive_message(int socket, std::string &buffer) {
+// 	int count = 0;
+// 	int total = 0;
+// 	char buffer[1024] = {0};
+// 	while ((count = recv(socket, &buffer[total], sizeof(buffer) - total, 0)) > 0)
+// 	{
+// 		total += count;
+// 	}
+// 	return total;
+// }
+
 void Server::handle_connection(int clientSocket)
 {
-	int fail;
-	// int count, total;
-	// total = 0;
-
-	char buffer[1024] = {0};
-// 	while ((count = recv(clientSocket, &buffer[total], sizeof(buffer) - total, 0)) > 0)
-// {
-//     total += count;
-// 	// std::cout << buffer;
-//     // At this point the buffer is valid from 0..total-1, if that's enough then process it and break, otherwise continue
-// 	memset(buffer,0,1024);
-// }
-// if (count == -1)
-// {
-//     perror("recv");
-// }
-// else if (count == 0)
-// {
-//     // EOS on the socket: close it, exit the thread, etc.
-// }
-	fail = recv(clientSocket, buffer, sizeof(buffer), 0);
-	if (fail == -1)
-		throw(6);
-	if (fail == 0)
-	{
-		std::cout << "Connection closed! " << std::endl;
-		FD_CLR(clientSocket, &current_sockets);
-		return;
-	}
 	Client &client = clients[std::to_string(clientSocket)];
-	client.set_msg(buffer);
+	client.receive(clientSocket, current_sockets);
 	parse_and_execute_client_command(client.get_msg(), client);
-	// msg = buffer;
 }
 
 int Server::accept_new_connection(int server)
 {
 	int clientSocket = accept(server, NULL, NULL);
-	 fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 	Client client1(clientSocket);
 	if (clientSocket == -1)
-		throw(5);
-	if (clientSocket > maxfd)
-		maxfd = clientSocket;
+		return -1;
+	 fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 	std::string val = std::to_string(clientSocket);
-	std::cout << "ADED!!\n";
 	clients[val] = client1;
+	std::cout << "Added new client: " << clientSocket << std::endl;
+
+	// for(std::map<std::string,Client >::const_iterator it = clients.begin();
+    // it != clients.end(); ++it)
+	// {
+	// 	std::cout << it->first << " " << it->second << " " << it->first << "\n";
+	// }
 	return clientSocket;
 }
 
@@ -149,12 +134,18 @@ void Server::accept_connections()
 				if (i == server)
 				{
 					clientSocket = accept_new_connection(server);
-					FD_SET(clientSocket, &current_sockets);
+					if (clientSocket != -1)
+					{
+						FD_SET(clientSocket, &current_sockets);
+						if (clientSocket > maxfd) {
+							maxfd = clientSocket;
+						}
+						std::cout << "Accepted new connection: " << clientSocket << std::endl;
+					}
 				}
 				else
 				{
 					handle_connection(i);
-					break;
 				}
 			}
 		}

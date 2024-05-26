@@ -13,6 +13,29 @@ Client::Client(int socket)
 	gethostname(_hostname, 1024);
 	hostname = (std::string)_hostname;
 }
+void Client::receive(int clientSocket, fd_set &current_sockets)
+{
+	int fail = 0;
+	char buffer[1024] = {0};
+	int count = 0;
+	while ((count = recv(clientSocket, &buffer[fail], sizeof(buffer) - fail, 0)) > 0)
+	{
+		fail += count;
+	}
+	if (fail == -1)
+	{
+		std::cerr << "Error receiving message: " << strerror(errno) << "\n";
+	}
+	else if (fail == 0)
+	{
+		// std::cout << "here!!!!!" << buffer<< "here!!!!!" << std::endl;
+		std::cout << "Connection closed! " << std::endl;
+		FD_CLR(clientSocket, &current_sockets);
+		close(clientSocket);
+	}
+	// std::cout << "Received: " << buffer << std::endl;
+	msg = std::string(buffer);
+}
 
 Client::Client()
 {
@@ -46,6 +69,11 @@ void	Client::set_oper(bool oper)
 void Client::set_msg(std::string newmsg)
 {
 	msg = newmsg;
+}
+
+void Client::set_id(std::string newmsg)
+{
+	id = newmsg;
 }
 
 void Client::set_hostname(std::string newmsg)
@@ -82,10 +110,23 @@ int Client::get_auth() const
 
 void Client::send_msg(std::string msg)
 {
-	std::cout << "Sending " << msg << "\n";
+	// std::cout << "Sending " << msg << "\n";
 	const char* message = msg.c_str();
-	if(send(fd, message, strlen(message), 0) == -1)
-		std::cerr<< "Sending error!\n";
+	// ssize_t totalSent = 0;
+	ssize_t messageLength = strlen(message);
+
+// while (totalSent < messageLength) {
+		ssize_t bytesSent = send(fd, message, messageLength, 0);
+		if (bytesSent == -1)
+			std::cerr << "Sending error: " << strerror(errno) << "\n";
+
+		// }
+	// 	totalSent += bytesSent;
+	// }
+
+
+	// if(send(fd, message, strlen(message), 0) == -1)
+	// 	std::cerr<< "Sending error!\n";
 
 }
 
@@ -103,6 +144,12 @@ std::string Client::get_nick() const
 {
 	return nickname;
 }
+
+std::string Client::get_id() const
+{
+	return id;
+}
+
 
 void Client::set_nick(std::string nick)
 {
