@@ -56,6 +56,7 @@ class Channel
 			int 		getUsrLim();
 			int 		getSize();
 			std::string getKey();
+			bool getHasPass();
 			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
 			void kickMember(Client *member, const std::string &reason);
 			bool isInChan(Client *member);

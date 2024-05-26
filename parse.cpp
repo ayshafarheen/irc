@@ -87,11 +87,11 @@ void Server::command_join_parsing(const std::string &args, Client &client)
         std::getline(strm, chan, ',');
         join.push_back(chan);
     }
-	if(args.length() == 0)
-	{
-		client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), args));
-		return ;
-	}
+	// if(args.length() == 0)
+	// {
+	// 	client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "JOIN", getservbyname()));
+	// 	return ;
+	// }
     if (args.size() > 1)
     {
         pass = args[1];
@@ -108,12 +108,13 @@ void Server::command_join_parsing(const std::string &args, Client &client)
                 channels[chan] = Channel(chan, &client);
 				channels[chan].setOper(&client);
              }
-			else if (!(channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
+			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
 				client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
-			else if (!pass.empty() && channels[chan].getKey() != pass)
+			else if ((channels[chan].getHasPass() == true) && !pass.empty() && channels[chan].getKey() != pass)
 				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 			else
 			{
+			 
 				channels[chan].addMember(&client);
 			}
         }

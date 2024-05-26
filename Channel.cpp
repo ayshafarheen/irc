@@ -24,6 +24,10 @@ std::string Channel::getServName()
 	return (this->name);
 }
 
+bool 	 Channel::getHasPass()
+{
+	return(hasPass);
+}
 void Channel::setTopic(std::string top)
 {
 	topic = top;
@@ -53,7 +57,7 @@ std::string Channel::getKey()
 	return key;
 }
 
-bool	Channel::isInChan(std::string member)
+bool	Channel::isInChan(Client* member)
 {
 	(void)member;
 	// ite itr = joined.find(member->get_nick());
@@ -97,8 +101,8 @@ void Channel::addMember(Client *member)
 		{
 			member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getServName(), member->get_servername()));
 		}
-		else
-			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
+		else{
+			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));}
 	}
 	sendToAll(*member, "", "JOIN", true);
 }
@@ -109,10 +113,12 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 	std::string fullmsg = ":" + userInfo + " " + cmd;
 	if (chan)
 		fullmsg += " " + this->name;
-	if (msg.at(0)!= ':')
-	fullmsg += msg + "\n";
-	std::map<std::string, Client *> sent;
-	for (ite it = joined.begin(); it != joined.end(); ++it)
+	// if (msg.at(0)!= ':')
+	// 	msg = ":" + msg;
+	fullmsg += msg + "\r\n";
+	std::cout << "here\n";
+	// std::map<std::string, Client *> sent;
+	for (ite it = joined.begin(); it != joined.end(); it++)
 	{
 		Client *member = it->second;
 		// if (member->get_nick() != client.get_nick() && sent.find(member->get_nick()) == sent.end()){
