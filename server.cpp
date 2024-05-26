@@ -3,6 +3,13 @@
 std::string Server::password = "";
 int Server::server = 0;
 
+void Server::clear_all()
+{
+	clients.clear();
+	auth_clients.clear();
+	channels.clear();
+}
+
 void Server::serv_handle(int n)
 {
 	if (n == 1)
@@ -23,6 +30,11 @@ void Server::serv_handle(int n)
 		std::cerr << "Invalid client socket\n";
 	if (n == 9)
 		std::cerr << "Incorrect password\n";
+}
+
+std::map<std::string, Client> &Server::get_client()
+{
+	return auth_clients;
 }
 
 std::string Server::to_string(int b)

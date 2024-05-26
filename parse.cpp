@@ -410,7 +410,6 @@ void Server::command_cap_parsing(const std::string &args, Client &client)
 
 void Server::command_ping_parsing(const std::string &args, Client &client)
 {
-	// (void) args;
 	std::string token = args.substr(args.find(":") + 1);
 	client.send_msg(RPL_PONG(client.get_servername(), token));
 }

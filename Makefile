@@ -6,7 +6,7 @@
 #    By: afarheen <afarheen@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/11/07 08:53:04 by afarheen          #+#    #+#              #
-#    Updated: 2024/05/26 14:49:09 by afarheen         ###   ########.fr        #
+#    Updated: 2024/05/26 17:59:06 by afarheen         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ MY_SOURCES = main.cpp server.cpp client.cpp parse.cpp Channel.cpp
 
 MY_OBJS = $(MY_SOURCES:.cpp=.o)
 
-CXXFLAGS =  -Wall -Wextra -Werror -g -fsanitize=address -std=c++98
+CXXFLAGS =  -Wall -Wextra -Werror -g  -std=c++98
 
 CXX = c++
 
