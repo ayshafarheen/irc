@@ -42,7 +42,7 @@ class Channel
 	int 					usrLim;
 
 
-	
+
 
 	public:
 			Channel();
@@ -52,13 +52,15 @@ class Channel
 			void setOper(Client *member);
 			std::string	getServName();
 			std::string getTopic();
+			void setTopic(std::string topic);
 			int 		getUsrLim();
 			int 		getSize();
 			std::string getKey();
 			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
 			void kickMember(Client *member, const std::string &reason);
-			bool isInChan(std::string member);
-	void memberQuit(Client *member, const std::string &reason);
+			bool isInChan(Client *member);
+			bool isInBanned(Client *member);
+			void memberQuit(Client *member, const std::string &reason);
 };
 
 #endif

@@ -247,6 +247,60 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
 }
 
+void handle_irssi(Client &client,std::vector<std::string> parts )
+{
+	if(parts.size() != 2)
+	{
+		client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
+		return ;
+	}
+	std::string username, hostname, servername, realname;
+	std::vector<std::string> args_sp = ft_split_whitespace(parts[0]);
+	if(!args_sp.empty() && (!args_sp[0].empty() && args_sp.size() == 3))
+	{
+		username = args_sp[0];
+		if(!args_sp[1].empty())
+		{
+			hostname = args_sp[1];
+			if(!args_sp[2].empty())
+			{
+				servername = args_sp[2];
+				realname = parts[1];
+			}
+			else
+			{
+				client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
+				return ;
+			}
+		}
+		else
+		{
+			client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
+			return ;
+		}
+	}
+	else
+	{
+		client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
+		return ;
+	}
+	client.set_user(username);
+	client.set_servername(servername);
+	client.set_realname(realname);
+}
+
+void handle_nc(const std::string &args, Client &client)
+{
+	std::vector<std::string> args_sp = ft_split_whitespace(args);
+	if(args_sp.size() != 1)
+	{
+		client.send_msg(ERR_NEEDMOREPARAMS((client.get_nick().empty() ? "*" : client.get_nick()), "USER", client.get_servername()));
+		return ;
+	}
+	else
+		client.set_user(args_sp[0]);
+}
+
 void Server::command_user_parsing(const std::string &args, Client &client)
 {
 	if (client.get_nick() != "" && auth_clients.find(client.get_nick()) != auth_clients.end())
@@ -256,35 +310,39 @@ void Server::command_user_parsing(const std::string &args, Client &client)
 	else
 	{
 		std::vector<std::string> parts = ft_split(args, ':');
-		if(parts.size() != 2)
-		{
-			client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
-			return ;
-		}
-		std::string username, hostname, servername, realname;
-		std::vector<std::string> args_sp = ft_split_whitespace(parts[0]);
-		if(!args_sp[0].empty() || args_sp.size() != 3)
-		{
-			username = args_sp[0];
-			if(!args_sp[1].empty())
-			{
-				hostname = args_sp[1];
-				if(!args_sp[2].empty())
-				{
-					servername = args_sp[2];
-					realname = parts[1];
-				}
-				else
-					client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
-			}
-			else
-				client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "USER", client.get_servername()));
-		}
-		client.set_user(username);
-		client.set_servername(servername);
-		client.set_realname(realname);
+		if(parts.size() == 1)
+			handle_nc(args, client);
+		else
+			handle_irssi(client, parts);
 		authenticate(client);
 	}
+}
+
+void Server::command_topic_parsing(const std::string &args, Client &client)
+{
+	std::vector<std::string> args_sp = ft_split(args, ':');
+	if(args_sp.size() == 2 || args_sp.size() == 1)
+	{
+		std::string channel = trim(std::string(args_sp[0]));
+		if(channels.find(channel) == channels.end())
+			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(),args_sp[0], client.get_servername()));
+		else if(!channels[channel].isInChan(&client))
+			client.send_msg(ERR_NOTONCHANNEL(client.get_nick(),args_sp[0], client.get_servername()));
+		else if(args_sp.size() == 1)
+			if(channels[channel].getTopic() == "[NULL]")
+				client.send_msg(RPL_NOTOPIC(client.get_nick(),args_sp[0], client.get_servername()));
+			else
+				client.send_msg(RPL_TOPIC(client.get_nick(),args_sp[0],channels[channel].getTopic(), client.get_servername()));
+		else if(args_sp.size() == 1 && args.find(':'))
+			channels[channel].setTopic("[NULL]");
+		else if(args_sp.size() == 2)
+		{
+			channels[channel].setTopic(std::string(args_sp[1]));
+		}
+	}
+	else
+		client.send_msg(ERR_NEEDMOREPARAMS((client.get_nick()), "TOPIC", client.get_servername()));
+
 }
 
 
@@ -321,10 +379,11 @@ void Server::command_pass_parsing(const std::string &args, Client &client)
 {
 	if(args != Server::get_pass())
 	{
-		client.send_msg(ERR_PASSWDMISMATCH(std::string(""), client.get_servername()));
-		// clients.erase(std::to_string(client.get_fd()));
+		client.send_msg(ERR_PASSWDMISMATCH(std::string("*"), client.get_servername()));
 		FD_CLR(client.get_fd(), &current_sockets);
-		// close(client.get_fd());
+		close(client.get_fd());
+		clients.erase(std::to_string(client.get_fd()));
+		throw(1);
 	}
 	else
 	{
@@ -354,6 +413,34 @@ void Server::command_ping_parsing(const std::string &args, Client &client)
 	client.send_msg(RPL_PONG(client.get_servername(), token));
 }
 
+void Server::command_priv_parsing(const std::string &args, Client &client)
+{
+	std::vector<std::string> args_sp = ft_split(args, ':');
+	if(args_sp.size() == 1)
+	{
+		if(args.find(':'))
+		{
+			if(args[args.length() - 1] == ':')
+				client.send_msg(ERR_NOTEXTTOSEND(client.get_nick()));
+			else
+				client.send_msg(ERR_NORECIPIENT(client.get_nick()));
+		}
+	}
+	else if(args_sp.size() == 2)
+	{
+		std::vector<std::string> receivers = ft_split(args_sp[0], ',');
+		for (std::vector<std::string>::iterator i = receivers.begin(); i != receivers.end(); ++i)
+		{
+			if(auth_clients.find(*i) != auth_clients.end())
+				auth_clients[*i].send_msg(args_sp[1]);
+			else if(channels.find(*i) != channels.end())
+				channels[*i].sendToAll(client, args_sp[1], "PRIVMSG", 1);
+			else
+				client.send_msg(ERR_NOSUCHNICK(client.get_nick(),std::string(*i)));
+		}
+	}
+}
+
 // Typedef for function pointers
 typedef void (Server::*CommandFunction)(const std::string &args, Client &client);
 
@@ -372,12 +459,13 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 	if(client.get_auth())
 	{
     	commandMap.insert(std::make_pair("JOIN", &Server::command_join_parsing));
+		commandMap.insert(std::make_pair("TOPIC", &Server::command_topic_parsing));
 		commandMap.insert(std::make_pair("KICK", &Server::command_kick_parsing));
 		commandMap.insert(std::make_pair("INVITE", &Server::command_invite_parsing));
 		commandMap.insert(std::make_pair("MODE", &Server::command_mode_parsing));
 		commandMap.insert(std::make_pair("PING", &Server::command_ping_parsing));
 		commandMap.insert(std::make_pair("PART", &Server::command_ping_parsing));
-
+		commandMap.insert(std::make_pair("PRIVMSG", &Server::command_priv_parsing));
 	}
 	std::vector<std::string> commands = ft_split(clientmsg, '\n');
 	try
@@ -385,7 +473,7 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 		for (unsigned long i = 0; i < commands.size() ; i++)
 		{
 			//  std::cout << "Debug: commands[" << i << "] = " << commands[i] << std::endl;
-        // std::cout << "Command is: " << commands[i]<< std::endl;
+        std::cout << "Command is: " << commands[i]<< std::endl;
 
 			command_name = first_word(commands[i]);
 			if (command_name.empty())
