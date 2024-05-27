@@ -184,8 +184,12 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 void Server::command_invite_parsing(const std::string &args, Client &client)
 {
 	std::string chan = first_word(args);
-	std::string to_invite = &args[2];
-	std::cout<< "\nadfhkeahbf" << chan << std::endl;
+	std::vector<std::string> vec = ft_split_whitespace(args);
+	std::vector<std::string >::iterator ite;
+	ite = vec.begin();
+	ite++;
+	std::string to_invite = *ite;
+	std::cout<< "\nadfhkeahbf" << *ite << std::endl;
 	itChan itr = channels.find(chan);
 	itCli dest;
 	itCli invitee;
@@ -195,6 +199,7 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 		else
 		{
 			dest = clients.find(to_invite);
+			std::cout << "clei" << dest->first<< std::endl;
 			if (dest == clients.end())
 				client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
 			else if ((channels[chan].isInChan(&dest->second) == true))
