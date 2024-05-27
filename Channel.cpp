@@ -89,14 +89,15 @@ void	Channel::setOper(Client *member)
 		member->set_oper(true);
 		opers.insert(std::pair<std::string, Client *>(member->get_nick(), member));
 		member->send_msg(RPL_YOUREOPER(member->get_nick()));
+		return ;
 	}
 	else if (!opers.empty())
 	{
-		for(ite opIt = opers.begin(); opIt != opers.end(); ++opIt)
+		for(ite opIt = opers.begin(); opIt != opers.end(); opIt++)
 		{
-			if (opers.find(member->get_nick()) != opers.end())
+			if (this->isInChan(member) == true)
 			{
-				member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
+				return member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
 			}
 			else
 			{
@@ -108,21 +109,26 @@ void	Channel::setOper(Client *member)
 	}
 }
 
+bool Channel::isInvited( std::string Nick ) {
+    ite inv;
+
+    inv = invited.find(Nick);
+    if (inv == invited.end())
+        return false;
+    return true;
+}
 
 void Channel::addMember(Client *member)
 {
-	ite iter;
-	for (iter = joined.begin(); iter != joined.end(); iter++)
-	{
-		if (joined.find(member->get_nick()) == joined.end())
-		{
-			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
-			member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
+		if (this->isInChan(member) == true){
+			std::cout <<"dfsfs" <<std::endl;
+			return member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
 		}
-		else
-			member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
-	}
-	sendToAll(*member, "", "JOIN", true);
+		if (this->isInChan(member) == false){
+
+			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
+		}
+	 sendToAll(*member, "", "JOIN", true);
 }
 
 std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd, bool chan)

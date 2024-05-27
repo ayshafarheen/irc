@@ -107,22 +107,19 @@ void Server::command_join_parsing(const std::string &args, Client &client)
              {
                 channels[chan] = Channel(chan, &client);
 				channels[chan].setOper(&client);
+				return ;
              }
 			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
-				client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
+				return client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
 			else if ((channels[chan].getHasPass() == true) && !pass.empty() && channels[chan].getKey() != pass)
-				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
+				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 			// pss needed for mode
 			else if(channels[chan].getPasswordNeeded() == true && pass.empty())
-				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
-			else if (channels[chan].getInviteOnlyMode() == true && (channels[chan].isInChan(&client) == true))
-				client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
+				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
+			else if (channels[chan].getInviteOnlyMode() == true && (channels[chan].isInvited(client.get_nick())== false))
+				return client.send_msg(ERR_INVITEONLYCHAN(client.get_nick(),chan, client.get_servername()));
 			// added because of the mode
-			else
-			{
-			 
-				channels[chan].addMember(&client);
-			}
+			channels[chan].addMember(&client);
         }
         else
             client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
@@ -186,14 +183,15 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 // INVITE user123 #chatroom1
 void Server::command_invite_parsing(const std::string &args, Client &client)
 {
-	std::string chan = &args[2];
-	std::string to_invite = &args[0];
+	std::string chan = first_word(args);
+	std::string to_invite = &args[2];
+	std::cout<< "\nadfhkeahbf" << chan << std::endl;
 	itChan itr = channels.find(chan);
 	itCli dest;
 	itCli invitee;
 	{
 		if (itr == channels.end())
-			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
+			 return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
 		else
 		{
 			dest = clients.find(to_invite);
