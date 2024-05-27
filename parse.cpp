@@ -183,33 +183,24 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 // INVITE user123 #chatroom1
 void Server::command_invite_parsing(const std::string &args, Client &client)
 {
-	std::string chan = first_word(args);
 	std::vector<std::string> vec = ft_split_whitespace(args);
 	std::vector<std::string >::iterator ite;
-	ite = vec.begin();
-	ite++;
-	std::string to_invite = *ite;
-	std::cout<< "\nadfhkeahbf" << *ite << std::endl;
+	std::string chan = vec[1];
+	std::string to_invite = vec[0];
+	std::cout<< "\nadfhkeahbf " << to_invite << std::endl;
 	itChan itr = channels.find(chan);
-	itCli dest;
-	itCli invitee;
+	itCli dest = clients.find(to_invite);
+	// itCli invitee = clients.find(to_invite);
+	if (itr == channels.end())
+		 return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
+	else if (dest == clients.end())
+			return client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
+	else if ((channels[chan].isInChan(&dest->second) == true))
+			return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
+	else
 	{
-		if (itr == channels.end())
-			 return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
-		else
-		{
-			dest = clients.find(to_invite);
-			std::cout << "clei" << dest->first<< std::endl;
-			if (dest == clients.end())
-				client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
-			else if ((channels[chan].isInChan(&dest->second) == true))
-			 	return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
-			else
-			{
-				 return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
-				 channels[chan].addToInvite(to_invite, dest->second, &client );
-			}
-		}
+		 return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
+		 channels[chan].addToInvite(to_invite, dest->second, &client );			
 		return ;
 	}
 	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
