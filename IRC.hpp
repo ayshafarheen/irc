@@ -7,6 +7,7 @@
 #include <map>
 #include <unistd.h>
 #include <fstream>
+#include <csignal>
 #include <sys/stat.h>
 #include <sstream>
 #include <ctime>
@@ -89,6 +90,7 @@ class Server
 	void command_join_parsing(const std::string &args, Client &client);
 	void command_kick_parsing(const std::string &args, Client &client);
 	void command_invite_parsing(const std::string &args, Client &client);
+	void signal_handler(int signal_num);
 	void command_ping_parsing(const std::string &args, Client &client);
 	void command_mode_parsing(const std::string &args, Client &client);
 	void command_cap_parsing(const std::string &args, Client &client);
@@ -106,7 +108,10 @@ class Server
 
 	public:
 	void set_server();
+	std::map<std::string, Client> &get_client();
+	void clear_all();
 	static std::string get_pass();
+	std::string to_string(int b);
 	Server(char **argv);
 	static int get_server();
 	int accept_new_connection(int server);

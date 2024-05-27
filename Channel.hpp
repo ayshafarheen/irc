@@ -40,9 +40,9 @@ class Channel
 	bool					hasPass;
 	bool					topRestrict;
 	int 					usrLim;
-
-
-
+	bool					inviteOnly;
+	bool					passwordNeeded;
+	bool					topicMode;
 
 	public:
 			Channel();
@@ -60,8 +60,15 @@ class Channel
 			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
 			void kickMember(Client *member, const std::string &reason);
 			bool isInChan(Client *member);
-			bool isInBanned(Client *member);
 			void memberQuit(Client *member, const std::string &reason);
+			void setInviteOnlyMode(bool enable);
+			void setPasswordNeeded(bool enable);
+			void setPrivilageMode(Client *member, bool enable);
+			void setTopicMode(bool enable);
+			bool getInviteOnlyMode();
+			bool getTopicMode();
+			bool getPasswordNeeded();
+			void callModeFucntion(Client *member, std::string flag);
 };
 
 #endif

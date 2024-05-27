@@ -3,6 +3,13 @@
 std::string Server::password = "";
 int Server::server = 0;
 
+void Server::clear_all()
+{
+	clients.clear();
+	auth_clients.clear();
+	channels.clear();
+}
+
 void Server::serv_handle(int n)
 {
 	if (n == 1)
@@ -23,6 +30,21 @@ void Server::serv_handle(int n)
 		std::cerr << "Invalid client socket\n";
 	if (n == 9)
 		std::cerr << "Incorrect password\n";
+}
+
+std::map<std::string, Client> &Server::get_client()
+{
+	return auth_clients;
+}
+
+std::string Server::to_string(int b)
+{
+	std::stringstream ss;
+	ss.str("");
+	ss.clear();
+	ss << b;
+	std::string str2 = ss.str();
+	return str2;
 }
 
 void Server::set_server()
@@ -62,7 +84,7 @@ void Server::authenticate(Client &client)
 {
 	if(client.get_user() != "" && client.get_nick() != "" && client.get_auth())
 	{
-		auth_clients[client.get_nick()] = clients[std::to_string(client.get_fd())];
+		auth_clients[client.get_nick()] = clients[to_string(client.get_fd())];
 		char _hostname[1024];
 		std::string hostname;
 		gethostname(_hostname, 1024);
@@ -89,7 +111,7 @@ void Server::authenticate(Client &client)
 
 void Server::handle_connection(int clientSocket)
 {
-	Client &client = clients[std::to_string(clientSocket)];
+	Client &client = clients[to_string(clientSocket)];
 	client.receive(clientSocket, current_sockets);
 	parse_and_execute_client_command(client.get_msg(), client);
 }
@@ -101,7 +123,7 @@ int Server::accept_new_connection(int server)
 	if (clientSocket == -1)
 		return -1;
 	 fcntl(clientSocket, F_SETFL, O_NONBLOCK);
-	std::string val = std::to_string(clientSocket);
+	std::string val = to_string(clientSocket);
 	clients[val] = client1;
 	std::cout << "Accepted new connection: " << clients[val].get_hostname() << std::endl;
 

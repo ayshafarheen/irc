@@ -12,11 +12,29 @@ Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 	this->hasPass = false;
 	this->topRestrict = false;
 	this->usrLim = -1;
+	this->inviteOnly = false;
+	this->topicMode = false;
+	this->passwordNeeded = false;
 	maker->send_msg(RPL_JOIN(maker->get_nick(), serv_name));
 }
 
 Channel::~Channel()
 {
+}
+
+bool	Channel::getInviteOnlyMode()
+{
+	return (this->inviteOnly);
+}
+
+bool	Channel::getTopicMode()
+{
+	return (this->topicMode);
+}
+
+bool	Channel::getPasswordNeeded()
+{
+	return (this->passwordNeeded);
 }
 
 std::string Channel::getServName()
@@ -59,11 +77,10 @@ std::string Channel::getKey()
 
 bool	Channel::isInChan(Client* member)
 {
-	(void)member;
-	// ite itr = joined.find(member->get_nick());
-	// if (itr == joined.end())
-		// member->send_msg(ERR_USERNOTINCHANNEL())
-	return (true);
+	if(joined.find(member->get_nick()) != joined.end())
+		return (true);
+	else
+		return (false);
 }
 
 void	Channel::setOper(Client *member)

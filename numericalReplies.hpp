@@ -18,6 +18,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 
 // INVITE
 # define ERR_NEEDMOREPARAMS(client, command, server) (":" + server+ " 461 " + client + " " + command + " :Not enough parameters.\r\n")
+# define ERR_INVITEONLYCHAN(client, channel, server) (":", + server+ " 473 " + client + " #" + channel + " :Cannot join channel (+i)")
 # define ERR_NOSUCHCHANNEL(client, channel, server) (":" + server+ " 403 " + client + " #" + channel + " :No such channel\r\n")
 # define ERR_NOTONCHANNEL(client, channel, server) (":" + server+ " 442 " + client + " #" + channel + " :The user is not on this channel.\r\n")
 # define ERR_USERONCHANNEL(client, nick, channel, server) (":" + server+ " 443 " + client + " " + nick + " #" + channel + " :Is already on channel\r\n")
