@@ -69,6 +69,7 @@ class Channel
 			bool getTopicMode();
 			bool getPasswordNeeded();
 			void callModeFucntion(Client *member, std::string flag);
+			void	addToInvite(std::string name, Client *client);
 };
 
 #endif

@@ -187,15 +187,25 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 void Server::command_invite_parsing(const std::string &args, Client &client)
 {
 	std::string chan = &args[2];
-	std::string to_invite = &args[1];
+	std::string to_invite = &args[0];
 	itChan itr = channels.find(chan);
 	itCli dest;
+	itCli invitee;
 	{
 		if (itr == channels.end())
 			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
 		else
 		{
-			// if ()
+			dest = clients.find(to_invite);
+			if (dest == clients.end())
+				client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
+			if ((channels[chan].isInChan(&dest->second) == true))
+			 	return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
+			else
+			{
+				 return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
+				 channels[chan].addToInvite()
+			}
 		}
 		return ;
 	}

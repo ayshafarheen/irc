@@ -176,3 +176,8 @@ void Channel::memberQuit(Client *member, const std::string &reason)
 		joined.erase(iter);
 	}
 }
+
+void	Channel::addToInvite(std::string name, Client *client)
+{
+	
+}
