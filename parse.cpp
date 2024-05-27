@@ -115,7 +115,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 			// pss needed for mode
 			else if(channels[chan].getPasswordNeeded() == true && pass.empty())
 				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
-			else if (channels[chan].getInviteOnlyMode() == true)
+			else if (channels[chan].getInviteOnlyMode() == true && (channels[chan].isInChan(&client) == true))
 				client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
 			// added because of the mode
 			else
@@ -199,12 +199,12 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 			dest = clients.find(to_invite);
 			if (dest == clients.end())
 				client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
-			if ((channels[chan].isInChan(&dest->second) == true))
+			else if ((channels[chan].isInChan(&dest->second) == true))
 			 	return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
 			else
 			{
 				 return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
-				 channels[chan].addToInvite()
+				 channels[chan].addToInvite(to_invite, dest->second, &client );
 			}
 		}
 		return ;

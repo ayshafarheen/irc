@@ -37,7 +37,7 @@ bool	Channel::getPasswordNeeded()
 	return (this->passwordNeeded);
 }
 
-std::string Channel::getServName()
+std::string Channel::getChanName()
 {
 	return (this->name);
 }
@@ -96,7 +96,7 @@ void	Channel::setOper(Client *member)
 		{
 			if (opers.find(member->get_nick()) != opers.end())
 			{
-				member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getServName(), member->get_servername()));
+				member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
 			}
 			else
 			{
@@ -114,12 +114,13 @@ void Channel::addMember(Client *member)
 	ite iter;
 	for (iter = joined.begin(); iter != joined.end(); iter++)
 	{
-		if (joined.find(member->get_nick()) != joined.end())
+		if (joined.find(member->get_nick()) == joined.end())
 		{
-			member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getServName(), member->get_servername()));
+			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
+			member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
 		}
-		else{
-			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));}
+		else
+			member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
 	}
 	sendToAll(*member, "", "JOIN", true);
 }
@@ -177,7 +178,8 @@ void Channel::memberQuit(Client *member, const std::string &reason)
 	}
 }
 
-void	Channel::addToInvite(std::string name, Client *client)
+void	Channel::addToInvite(std::string name, Client &client, Client *invitor)
 {
-	
+	invited[name] = &client;
+	invitor->send_msg(RPL_INVITING(user_id(invitor->get_nick(), invitor->get_user(), invitor->get_servername()), invitor->get_nick(), client.get_nick(), this->getChanName()));
 }
