@@ -17,10 +17,10 @@ int main(int argc, char **argv)
 {
 	signal(SIGINT, signal_handler);
 	signal(SIGQUIT, signal_handler);
-	Server serv(argv);
-	class_ptr = &serv;
 	if(argc == 3)
 	{
+		Server serv(argv);
+		class_ptr = &serv;
 		try
 		{
 			serv.set_server();
