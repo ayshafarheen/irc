@@ -8,6 +8,7 @@ void Server::clear_all()
 	clients.clear();
 	auth_clients.clear();
 	channels.clear();
+	
 }
 
 void Server::serv_handle(int n)
@@ -138,7 +139,7 @@ int Server::accept_new_connection(int server)
 // select() gives you the power to monitor several sockets at the same time
 void Server::accept_connections()
 {
-	fd_set ready_sockets;
+	fd_set ready_sockets,wready_sockets;
 	int clientSocket;
 
 	FD_ZERO(&ready_sockets);
@@ -147,7 +148,8 @@ void Server::accept_connections()
 	{
 		// select changes the set passed in so we ned temporary copy
 		ready_sockets = current_sockets;
-		if (select(maxfd +1, &ready_sockets, NULL, NULL, NULL) < 0)
+		wready_sockets = current_sockets;
+		if (select(maxfd +1, &ready_sockets, &wready_sockets, NULL, NULL) < 0)
 			throw(7);
 		for (int i = 0; i < maxfd +1; i++)
 		{
