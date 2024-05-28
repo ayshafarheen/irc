@@ -116,7 +116,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 			// pss needed for mode
 			else if(channels[chan].getPasswordNeeded() == true && pass.empty())
 				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
-			else if (channels[chan].getInviteOnlyMode() == true && (channels[chan].isInvited(client.get_nick())== false))
+			else if (channels[chan].getInviteOnlyMode() == true && (!channels[chan].isInvited(client.get_nick())))
 				return client.send_msg(ERR_INVITEONLYCHAN(client.get_nick(),chan, client.get_servername()));
 			// added because of the mode
 			channels[chan].addMember(&client);
@@ -187,10 +187,9 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	std::vector<std::string >::iterator ite;
 	std::string chan = vec[1];
 	std::string to_invite = vec[0];
-	std::cout<< "\nadfhkeahbf " << to_invite << std::endl;
+	std::cout<< "\nadfhkeahbf " << to_invite << "gfdgS" << std::endl;
 	itChan itr = channels.find(chan);
-	itCli dest = clients.find(to_invite);
-	// itCli invitee = clients.find(to_invite);
+	itCli dest = auth_clients.find(to_invite);
 	if (itr == channels.end())
 		 return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
 	else if (dest == clients.end())
@@ -200,8 +199,7 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	else
 	{
 		 return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
-		 channels[chan].addToInvite(to_invite, dest->second, &client );			
-		return ;
+		 channels[chan].addToInvite(to_invite, dest->second, &client );
 	}
 	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 }

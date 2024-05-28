@@ -137,18 +137,14 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 	std::string fullmsg = ":" + userInfo + " " + cmd;
 	if (chan)
 		fullmsg += " " + this->name;
-	// if (msg.at(0)!= ':')
-	// 	msg = ":" + msg;
+
 	fullmsg += msg + "\r\n";
 	std::cout << "here\n";
-	// std::map<std::string, Client *> sent;
+
 	for (ite it = joined.begin(); it != joined.end(); it++)
 	{
 		Client *member = it->second;
-		// if (member->get_nick() != client.get_nick() && sent.find(member->get_nick()) == sent.end()){
 		member->send_msg(fullmsg);
-		// sent[member->get_nick()] = member;
-		// }
 	}
 
 	return (fullmsg);
@@ -186,6 +182,17 @@ void Channel::memberQuit(Client *member, const std::string &reason)
 
 void	Channel::addToInvite(std::string name, Client &client, Client *invitor)
 {
-	invited[name] = &client;
+	invited.insert(std::pair<std::string, Client*>(name, &client));
 	invitor->send_msg(RPL_INVITING(user_id(invitor->get_nick(), invitor->get_user(), invitor->get_servername()), invitor->get_nick(), client.get_nick(), this->getChanName()));
+}
+
+std::string Channel::getMemberList()
+{
+	std::string list;
+	ite itr;
+	for (itr = joined.begin(); itr !=  joined.end(); itr++)
+	{
+		list += itr->second->get_nick() + " ";
+	}
+	return list;
 }

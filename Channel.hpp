@@ -71,6 +71,7 @@ class Channel
 			void callModeFucntion(Client *member, std::string flag);
 			void	addToInvite(std::string name, Client &client, Client *invitor);
 			bool isInvited(std::string Nick);
+			std::string getMemberList();
 };
 
 #endif
