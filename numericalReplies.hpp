@@ -18,17 +18,17 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 
 // INVITE
 # define ERR_NEEDMOREPARAMS(client, command, server) (":" + server+ " 461 " + client + " " + command + " :Not enough parameters.\r\n")
-# define ERR_INVITEONLYCHAN(client, channel, server) (":" + server+ " 473 " + client + " #" + channel + " :Cannot join channel (+i)")
-# define ERR_NOSUCHCHANNEL(client, channel, server) (":" + server+ " 403 " + client + " #" + channel + " :No such channel\r\n")
-# define ERR_NOTONCHANNEL(client, channel, server) (":" + server+ " 442 " + client + " #" + channel + " :The user is not on this channel.\r\n")
+# define ERR_INVITEONLYCHAN(client, channel, server) (":" + server+ " 473 " + client + " " + channel + " :Cannot join channel (+i)")
+# define ERR_NOSUCHCHANNEL(client, channel, server) (":" + server+ " 403 " + client + " " + channel + " :No such channel\r\n")
+# define ERR_NOTONCHANNEL(client, channel, server) (":" + server+ " 442 " + client +  " "+ channel + " :The user is not on this channel.\r\n")
 # define ERR_USERONCHANNEL(client, nick, channel, server) (":" + server+ " 443 " + client + " " + nick + " #" + channel + " :Is already on channel\r\n")
-# define RPL_INVITING(user_id, client, nick, channel) (user_id + " 341 " + client + " " + nick + " #" + channel + "\r\n")
-# define RPL_INVITE(user_id, invited, channel) (user_id + " INVITE " + invited + " #" + channel + "\r\n")
+# define RPL_INVITING(user_id, client, nick, channel) (user_id + " 341 " + client + " " + nick + " " + channel + "\r\n")
+# define RPL_INVITE(user_id, invited, channel) (user_id + " INVITE " + invited + " " + channel + "\r\n")
 
 // JOIN
 # define RPL_JOIN(user_id, channel) (user_id + " JOIN :" +  channel + "\r\n")
-# define ERR_BANNEDFROMCHAN(client, channel) ("474 " + client + " #" + channel + " :Cannot join channel (+b)\r\n")
-# define ERR_BADCHANNELKEY(client, channel) ("475 " + client + " #" + channel + " :Cannot join channel (+k)\r\n")
+# define ERR_BANNEDFROMCHAN(client, channel) ("474 " + client + " " + channel + " :Cannot join channel (+b)\r\n")
+# define ERR_BADCHANNELKEY(client, channel) ("475 " + client + " " + channel + " :Cannot join channel (+k)\r\n")
 
 // KICK
 # define ERR_USERNOTINCHANNEL(client, nickname, channel) ("441 " + client + " " + nickname + " #" + channel + " :They aren't on that channel\r\n")
@@ -50,9 +50,9 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 #define MODE_CHANNELMSGWITHPARAM(channel, mode, param, server) (":" + server+ " MODE #" + channel + " " + mode + " " + param + "\r\n")
 #define RPL_CHANNELMODEIS(client, channel, mode, server) (":" + server+ " 324 " + client + " #" + channel + " " + mode + "\r\n")
 #define RPL_CHANNELMODEISWITHKEY(client, channel, mode, password, server) (":" + server+ " 324 " + client + " #" + channel + " " + mode + " " + password + "\r\n")
-#define ERR_CANNOTSENDTOCHAN(client, channel) ("404 " + client + " #" + channel + " :Cannot send to channel\r\n")
-#define ERR_CHANNELISFULL(client, channel) ("471 " + client + " #" + channel + " :Cannot join channel (+l)\r\n")
-#define ERR_CHANOPRIVSNEEDED(client, channel, server) (":" + server+ " 482 " + client + " #" + channel + " :You're not channel operator\r\n")
+#define ERR_CANNOTSENDTOCHAN(client, channel) ("404 " + client + " " + channel + " :Cannot send to channel\r\n")
+#define ERR_CHANNELISFULL(client, channel) ("471 " + client + " " + channel + " :Cannot join channel (+l)\r\n")
+#define ERR_CHANOPRIVSNEEDED(client, channel, server) (":" + server+ " 482 " + client + " " + channel + " :You're not channel operator\r\n")
 #define ERR_INVALIDMODEPARAM(client, channel, mode, password) ("696 " + client + " #" + channel + " " + mode + " " + password + " : password must only contained alphabetic character\r\n")
 // RPL_ERR a broadcoast quand user pas +v ou operator veut parler
       // dans notre cas c'était tiff (client) qui voulait send a message
@@ -68,8 +68,8 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 
 
 // NAMES
-# define RPL_NAMREPLY(client, symbol, channel, list_of_nicks, server) (":" + server+ " 353 " + client + " " + symbol + " #" + channel + " :" + list_of_nicks + "\r\n")
-# define RPL_ENDOFNAMES(client, channel, server) (":" + server+ " 366 " + client + " #" + channel + " :End of /NAMES list.\r\n")
+# define RPL_NAMREPLY(client, channel, list_of_nicks, server) (":" + server+ " 353 " + client + " "  + channel + " :" + list_of_nicks + "\r\n")
+# define RPL_ENDOFNAMES(client, channel, server) (":" + server+ " 366 " + client +  " " + channel + " :End of /NAMES list.\r\n")
 
 // NICK
 # define ERR_NONICKNAMEGIVEN(client, server) (":" + server+ " 431 " + client + " :There is no nickname.\r\n")
@@ -107,7 +107,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 # define RPL_PRIVMSG(nick, username, target, message, server) (":" + nick + "!" + username + "@" + server+ " PRIVMSG " + target + " " + message + "\r\n")
 
 // TOPIC
-# define RPL_TOPIC(client, channel, topic, server) (":" + server+ " 332 " + client + " #" + channel + " " + topic + "\r\n")
+# define RPL_TOPIC(client, channel, topic, server) (":" + server+ " 332 " + client + " "+ channel + " " + topic + "\r\n")
 # define RPL_NOTOPIC(client, channel, server) (":" + server+ " 331 " + client + " #" + channel + " :No topic is set\r\n")
 # define RPL_NOTOPIC(client, channel, server) (":" + server+ " 331 " + client + " #" + channel + " :No topic is set\r\n")
 

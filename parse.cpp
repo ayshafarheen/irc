@@ -113,8 +113,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
                 channels[chan] = Channel(chan, &client);
 				channels[chan].setOper(&client);
 				return ;
-				return ;
-             }
+			 }
 			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
 				return client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
 			else if ((channels[chan].getHasPass() == true) && !pass.empty() && channels[chan].getKey() != pass)
@@ -129,7 +128,6 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 			else if (channels[chan].getInviteOnlyMode() == true && (!channels[chan].isInvited(client.get_nick())))
 				return client.send_msg(ERR_INVITEONLYCHAN(client.get_nick(),chan, client.get_servername()));
 			// added because of the mode
-			channels[chan].addMember(&client);
 			channels[chan].addMember(&client);
         }
         else
@@ -201,16 +199,19 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	std::cout<< "\nadfhkeahbf " << to_invite << "gfdgS" << std::endl;
 	itChan itr = channels.find(chan);
 	itCli dest = auth_clients.find(to_invite);
-	if (itr == channels.end())
-		 return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
-	else if (dest == clients.end())
-			return client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
-	else if ((channels[chan].isInChan(&dest->second) == true))
-			return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
-	else
+	if (channels[chan].isOper(client.get_nick()))
 	{
-		 return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
-		 channels[chan].addToInvite(to_invite, dest->second, &client );
+		if (itr == channels.end())
+			 return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
+		else if (dest == clients.end())
+			return client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
+		else if ((channels[chan].isInChan(&dest->second) == true))
+			return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
+		else
+		{
+		 	channels[chan].addToInvite(to_invite, &dest->second, &client );
+			return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
+		}
 	}
 	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 }

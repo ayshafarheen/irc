@@ -57,6 +57,7 @@ class Channel
 			int 		getSize();
 			std::string getKey();
 			bool getHasPass();
+			bool isOper(std::string nick);
 			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
 			void kickMember(Client *member, const std::string &reason);
 			bool isInChan(Client *member);
@@ -69,9 +70,10 @@ class Channel
 			bool getTopicMode();
 			bool getPasswordNeeded();
 			void callModeFucntion(Client *member, std::string flag);
-			void	addToInvite(std::string name, Client &client, Client *invitor);
+			void	addToInvite(std::string name, Client *client, Client *invitor);
 			bool isInvited(std::string Nick);
 			std::string getMemberList();
-};
+			void	welcome(Client *member);
 
+};
 #endif
