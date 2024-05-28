@@ -152,6 +152,9 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 		// if (member->get_nick() != client.get_nick() && sent.find(member->get_nick()) == sent.end()){
 			member->send_msg(msg);
 		}
+		else
+			member->send_msg(msg);
+
 		// sent[member->get_nick()] = member;
 		// }
 	}

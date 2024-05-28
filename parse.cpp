@@ -456,7 +456,6 @@ void Server::command_ping_parsing(const std::string &args, Client &client)
 
 void Server::command_priv_parsing(const std::string &args, Client &client)
 {
-	std::cout << "HERE!!!!!!\n";
 	std::vector<std::string> args_sp = ft_split(args, ':');
 	if(args_sp.size() == 1)
 	{
