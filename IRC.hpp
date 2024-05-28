@@ -57,7 +57,7 @@ class Client
 	std::string get_nick() const;
 	void set_hostname(std::string newmsg);
 	void set_servername(std::string newmsg);
-	void receive(int socket, fd_set &current_sockets);
+	void receive(int socket, fd_set &current_sockets, std::map<std::string, Client> & clients, std::map<std::string, Client> & auth_clients);
 	void set_id(std::string newmsg);
 	void set_realname(std::string newmsg);
 	std::string get_hostname() const;
@@ -111,7 +111,7 @@ class Server
 	std::map<std::string, Client> &get_client();
 	void clear_all();
 	static std::string get_pass();
-	std::string to_string(int b);
+	static std::string to_string(int b);
 	Server(char **argv);
 	static int get_server();
 	int accept_new_connection(int server);

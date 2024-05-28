@@ -79,12 +79,6 @@ int validChan(std::string channame)
 // JOIN #chatroom1,#chatroom2
 void Server::command_join_parsing(const std::string &args, Client &client)
 {
-	std::string test = args;
-	if(test.length() == 0)
-	{
-		std::cout << "write something" << std::endl;
-		return ;
-	}
     std::string chan, str, pass;
     std::list<std::string> join;
     std::stringstream strm(args);
@@ -93,6 +87,11 @@ void Server::command_join_parsing(const std::string &args, Client &client)
         std::getline(strm, chan, ',');
         join.push_back(chan);
     }
+	// if(args.length() == 0)
+	// {
+	// 	client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "JOIN", getservbyname()));
+	// 	return ;
+	// }
     if (args.size() > 1)
     {
         pass = args[1];
@@ -108,21 +107,19 @@ void Server::command_join_parsing(const std::string &args, Client &client)
              {
                 channels[chan] = Channel(chan, &client);
 				channels[chan].setOper(&client);
+				return ;
              }
-			else if (!(channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
-				client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
-			else if (!pass.empty() && channels[chan].getKey() != pass)
-				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
+			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
+				return client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
+			else if ((channels[chan].getHasPass() == true) && !pass.empty() && channels[chan].getKey() != pass)
+				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 			// pss needed for mode
 			else if(channels[chan].getPasswordNeeded() == true && pass.empty())
-				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
-			else if (channels[chan].getInviteOnlyMode() == true)
-				client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
+				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
+			else if (channels[chan].getInviteOnlyMode() == true && (channels[chan].isInvited(client.get_nick())== false))
+				return client.send_msg(ERR_INVITEONLYCHAN(client.get_nick(),chan, client.get_servername()));
 			// added because of the mode
-			else
-			{
-				channels[chan].addMember(&client);
-			}
+			channels[chan].addMember(&client);
         }
         else
             client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
@@ -186,22 +183,29 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 // INVITE user123 #chatroom1
 void Server::command_invite_parsing(const std::string &args, Client &client)
 {
-	std::string chan = &args[2];
-	std::string to_invite = &args[1];
+	std::vector<std::string> vec = ft_split_whitespace(args);
+	std::vector<std::string >::iterator ite;
+	std::string chan = vec[1];
+	std::string to_invite = vec[0];
+	std::cout<< "\nadfhkeahbf " << to_invite << std::endl;
 	itChan itr = channels.find(chan);
-	// itCli itrC = clients.find(to_invite);
-	if (client.getOper())
+	itCli dest = clients.find(to_invite);
+	// itCli invitee = clients.find(to_invite);
+	if (itr == channels.end())
+		 return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
+	else if (dest == clients.end())
+			return client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
+	else if ((channels[chan].isInChan(&dest->second) == true))
+			return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
+	else
 	{
-		if (itr == channels.end())
-			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
-		else
-		{
-			// if ()
-		}
+		 return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
+		 channels[chan].addToInvite(to_invite, dest->second, &client );
 		return ;
 	}
 	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 }
+
 
 // if they have none of them than it's just a wrong flag
 bool check_mode(std::string args)
@@ -244,7 +248,7 @@ void	Channel::callModeFucntion(Client *member, std::string flag)
 		this->setPrivilageMode(member, true);
 	if (flag == "-o")
 		this->setPrivilageMode(member, false);
-	
+
 }
 
 // MODE #chatroom1 +o user123
@@ -452,6 +456,7 @@ void Server::command_ping_parsing(const std::string &args, Client &client)
 
 void Server::command_priv_parsing(const std::string &args, Client &client)
 {
+	std::cout << "HERE!!!!!!\n";
 	std::vector<std::string> args_sp = ft_split(args, ':');
 	if(args_sp.size() == 1)
 	{
@@ -468,11 +473,11 @@ void Server::command_priv_parsing(const std::string &args, Client &client)
 		std::vector<std::string> receivers = ft_split(args_sp[0], ',');
 		for (std::vector<std::string>::iterator i = receivers.begin(); i != receivers.end(); ++i)
 		{
-			std::string msg = client.get_nick() + ": " + args_sp[1] + "\r\n";
+			// std::string msg = client.get_nick() + ": " + args_sp[1] + "\r\n";
 			if(auth_clients.find(trim(*i)) != auth_clients.end())
-				auth_clients[trim(*i)].send_msg(msg);
+				auth_clients[trim(*i)].send_msg(RPL_PRIVMSG(client.get_nick(), client.get_user(), trim(*i), args_sp[1], client.get_servername()));
 			else if(channels.find(trim(*i)) != channels.end())
-				channels[trim(*i)].sendToAll(client, msg, "PRIVMSG", 1);
+				channels[trim(*i)].sendToAll(client, RPL_PRIVMSG(client.get_nick(), client.get_user(), trim(*i), args_sp[1], client.get_servername()), "PRIVMSG", 1);
 			else
 				client.send_msg(ERR_NOSUCHNICK(client.get_nick(),std::string(trim(*i))));
 		}

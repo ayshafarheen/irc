@@ -13,7 +13,7 @@ Client::Client(int socket)
 	gethostname(_hostname, 1024);
 	hostname = (std::string)_hostname;
 }
-void Client::receive(int clientSocket, fd_set &current_sockets)
+void Client::receive(int clientSocket, fd_set &current_sockets, std::map<std::string, Client> & clients, std::map<std::string, Client> & auth_clients)
 {
 	int fail = 0;
 	char buffer[1024] = {0};
@@ -27,9 +27,12 @@ void Client::receive(int clientSocket, fd_set &current_sockets)
 	{
 		std::cout << "Connection closed! " << std::endl;
 		FD_CLR(clientSocket, &current_sockets);
+		if(auth_clients.find(clients.find(Server::to_string(clientSocket))->second.get_nick()) != auth_clients.end() && clients.find(Server::to_string(clientSocket))->second.get_fd() == clientSocket)
+			auth_clients.erase(Server::to_string(clientSocket));
+		clients.erase(Server::to_string(clientSocket));
 		close(clientSocket);
 	}
-	if(strchr(buffer,'\n'))
+	else if(strchr(buffer,'\n'))
 		msg = std::string(buffer);
 	else
 		goto top;
@@ -107,6 +110,7 @@ int Client::get_auth() const
 
 void Client::send_msg(std::string msg)
 {
+	std::cout << "Sending " << msg << " to " << fd << std::endl;
 	const char* message = msg.c_str();
 	ssize_t messageLength = strlen(message);
 	ssize_t bytesSent = send(fd, message, messageLength, 0);

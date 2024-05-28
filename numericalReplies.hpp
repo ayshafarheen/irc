@@ -18,7 +18,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 
 // INVITE
 # define ERR_NEEDMOREPARAMS(client, command, server) (":" + server+ " 461 " + client + " " + command + " :Not enough parameters.\r\n")
-# define ERR_INVITEONLYCHAN(client, channel, server) (":", + server+ " 473 " + client + " #" + channel + " :Cannot join channel (+i)")
+# define ERR_INVITEONLYCHAN(client, channel, server) (":" + server+ " 473 " + client + " #" + channel + " :Cannot join channel (+i)")
 # define ERR_NOSUCHCHANNEL(client, channel, server) (":" + server+ " 403 " + client + " #" + channel + " :No such channel\r\n")
 # define ERR_NOTONCHANNEL(client, channel, server) (":" + server+ " 442 " + client + " #" + channel + " :The user is not on this channel.\r\n")
 # define ERR_USERONCHANNEL(client, nick, channel, server) (":" + server+ " 443 " + client + " " + nick + " #" + channel + " :Is already on channel\r\n")
@@ -26,7 +26,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 # define RPL_INVITE(user_id, invited, channel) (user_id + " INVITE " + invited + " #" + channel + "\r\n")
 
 // JOIN
-# define RPL_JOIN(user_id, channel) (user_id + " JOIN :#" +  channel + "\r\n")
+# define RPL_JOIN(user_id, channel) (user_id + " JOIN :" +  channel + "\r\n")
 # define ERR_BANNEDFROMCHAN(client, channel) ("474 " + client + " #" + channel + " :Cannot join channel (+b)\r\n")
 # define ERR_BADCHANNELKEY(client, channel) ("475 " + client + " #" + channel + " :Cannot join channel (+k)\r\n")
 

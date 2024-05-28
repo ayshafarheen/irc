@@ -34,7 +34,7 @@ class Channel
 	typedef std::map<std::string, Client *>::iterator ite;
 	std::vector<int> clients;
 	std::map<std::string, Client *> joined;
-	std::map<std::string, Client *> banned;
+	std::map<std::string, Client *>	invited;
 	std::map<std::string, Client *> opers;
 	bool					isInv;
 	bool					hasPass;
@@ -50,12 +50,13 @@ class Channel
 			~Channel();
 			void addMember(Client *member);
 			void setOper(Client *member);
-			std::string	getServName();
+			std::string	getChanName();
 			std::string getTopic();
 			void setTopic(std::string topic);
 			int 		getUsrLim();
 			int 		getSize();
 			std::string getKey();
+			bool getHasPass();
 			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
 			void kickMember(Client *member, const std::string &reason);
 			bool isInChan(Client *member);
@@ -68,6 +69,8 @@ class Channel
 			bool getTopicMode();
 			bool getPasswordNeeded();
 			void callModeFucntion(Client *member, std::string flag);
+			void	addToInvite(std::string name, Client &client, Client *invitor);
+			bool isInvited(std::string Nick);
 };
 
 #endif
