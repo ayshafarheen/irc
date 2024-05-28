@@ -46,6 +46,10 @@ bool 	 Channel::getHasPass()
 {
 	return(hasPass);
 }
+bool 	 Channel::getHasPass()
+{
+	return(hasPass);
+}
 void Channel::setTopic(std::string top)
 {
 	topic = top;
@@ -76,6 +80,7 @@ std::string Channel::getKey()
 }
 
 bool	Channel::isInChan(Client* member)
+bool	Channel::isInChan(Client* member)
 {
 	if(joined.find(member->get_nick()) != joined.end())
 		return (true);
@@ -90,13 +95,17 @@ void	Channel::setOper(Client *member)
 		opers.insert(std::pair<std::string, Client *>(member->get_nick(), member));
 		member->send_msg(RPL_YOUREOPER(member->get_nick()));
 		return ;
+		return ;
 	}
 	else if (!opers.empty())
 	{
 		for(ite opIt = opers.begin(); opIt != opers.end(); opIt++)
+		for(ite opIt = opers.begin(); opIt != opers.end(); opIt++)
 		{
 			if (this->isInChan(member) == true)
+			if (this->isInChan(member) == true)
 			{
+				return member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
 				return member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
 			}
 			else
@@ -117,6 +126,14 @@ bool Channel::isInvited( std::string Nick ) {
         return false;
     return true;
 }
+bool Channel::isInvited( std::string Nick ) {
+    ite inv;
+
+    inv = invited.find(Nick);
+    if (inv == invited.end())
+        return false;
+    return true;
+}
 
 void Channel::addMember(Client *member)
 {
@@ -128,26 +145,35 @@ void Channel::addMember(Client *member)
 
 			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
 		}
-	 sendToAll(*member, "", "JOIN", true);
+	 sendToAll(*member, RPL_JOIN(member->get_id(), getChanName()), "JOIN", true);
 }
 
 std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd, bool chan)
 {
-	std::string userInfo = client.get_nick() + "!" + client.get_user() + "@" + "localhost";
-	std::string fullmsg = ":" + userInfo + " " + cmd;
-	if (chan)
-		fullmsg += " " + this->name;
-
-	fullmsg += msg + "\r\n";
-	std::cout << "here\n";
-
+	(void) chan;
+	// std::string userInfo = client.get_nick() + "!" + client.get_user() + "@" + "localhost";
+	// std::string fullmsg = ":" + userInfo + " " + cmd;
+	// if (chan)
+	// 	fullmsg += " " + this->name;
+	// if (msg.at(0)!= ':')
+	// 	msg = ":" + msg;
+	// fullmsg += msg + "\r\n";
+	// std::cout << "here\n";
+	// std::map<std::string, Client *> sent;
 	for (ite it = joined.begin(); it != joined.end(); it++)
 	{
 		Client *member = it->second;
-		member->send_msg(fullmsg);
+		if(cmd == "PRIVMSG")
+		{
+			if(member->get_fd() != client.get_fd())
+		// if (member->get_nick() != client.get_nick() && sent.find(member->get_nick()) == sent.end()){
+			member->send_msg(msg);
+		}
+		// sent[member->get_nick()] = member;
+		// }
 	}
 
-	return (fullmsg);
+	return (msg);
 }
 
 void Channel::kickMember(Client *member, const std::string &reason)

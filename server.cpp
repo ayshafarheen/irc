@@ -5,10 +5,15 @@ int Server::server = 0;
 
 void Server::clear_all()
 {
+	// for (std::map<std::string,Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
+	// {
+	// 	std::cout << ((*i).second).get_fd() << std::endl;
+	// 	close((((*i).second)).get_fd());
+	// }
 	clients.clear();
 	auth_clients.clear();
 	channels.clear();
-	
+
 }
 
 void Server::serv_handle(int n)
@@ -113,8 +118,9 @@ void Server::authenticate(Client &client)
 void Server::handle_connection(int clientSocket)
 {
 	Client &client = clients[to_string(clientSocket)];
-	client.receive(clientSocket, current_sockets);
-	parse_and_execute_client_command(client.get_msg(), client);
+	client.receive(clientSocket, current_sockets, clients, auth_clients);
+	if(clients.find(Server::to_string(clientSocket)) != clients.end())
+		parse_and_execute_client_command(client.get_msg(), client);
 }
 
 int Server::accept_new_connection(int server)
@@ -127,12 +133,6 @@ int Server::accept_new_connection(int server)
 	std::string val = to_string(clientSocket);
 	clients[val] = client1;
 	std::cout << "Accepted new connection: " << clients[val].get_hostname() << std::endl;
-
-	// for(std::map<std::string,Client >::const_iterator it = clients.begin();
-    // it != clients.end(); ++it)
-	// {
-	// 	std::cout << it->first << " " << it->second << " " << it->first << "\n";
-	// }
 	return clientSocket;
 }
 

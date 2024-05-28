@@ -92,6 +92,11 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 	// 	client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "JOIN", getservbyname()));
 	// 	return ;
 	// }
+	// if(args.length() == 0)
+	// {
+	// 	client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "JOIN", getservbyname()));
+	// 	return ;
+	// }
     if (args.size() > 1)
     {
         pass = args[1];
@@ -108,7 +113,12 @@ void Server::command_join_parsing(const std::string &args, Client &client)
                 channels[chan] = Channel(chan, &client);
 				channels[chan].setOper(&client);
 				return ;
+				return ;
              }
+			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
+				return client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
+			else if ((channels[chan].getHasPass() == true) && !pass.empty() && channels[chan].getKey() != pass)
+				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
 				return client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
 			else if ((channels[chan].getHasPass() == true) && !pass.empty() && channels[chan].getKey() != pass)
@@ -119,6 +129,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 			else if (channels[chan].getInviteOnlyMode() == true && (!channels[chan].isInvited(client.get_nick())))
 				return client.send_msg(ERR_INVITEONLYCHAN(client.get_nick(),chan, client.get_servername()));
 			// added because of the mode
+			channels[chan].addMember(&client);
 			channels[chan].addMember(&client);
         }
         else
@@ -204,6 +215,7 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 }
 
+
 // if they have none of them than it's just a wrong flag
 bool check_mode(std::string args)
 {
@@ -245,7 +257,7 @@ void	Channel::callModeFucntion(Client *member, std::string flag)
 		this->setPrivilageMode(member, true);
 	if (flag == "-o")
 		this->setPrivilageMode(member, false);
-	
+
 }
 
 // MODE #chatroom1 +o user123
@@ -453,6 +465,7 @@ void Server::command_ping_parsing(const std::string &args, Client &client)
 
 void Server::command_priv_parsing(const std::string &args, Client &client)
 {
+	std::cout << "HERE!!!!!!\n";
 	std::vector<std::string> args_sp = ft_split(args, ':');
 	if(args_sp.size() == 1)
 	{
@@ -469,11 +482,11 @@ void Server::command_priv_parsing(const std::string &args, Client &client)
 		std::vector<std::string> receivers = ft_split(args_sp[0], ',');
 		for (std::vector<std::string>::iterator i = receivers.begin(); i != receivers.end(); ++i)
 		{
-			std::string msg = client.get_nick() + ": " + args_sp[1] + "\r\n";
+			// std::string msg = client.get_nick() + ": " + args_sp[1] + "\r\n";
 			if(auth_clients.find(trim(*i)) != auth_clients.end())
-				auth_clients[trim(*i)].send_msg(msg);
+				auth_clients[trim(*i)].send_msg(RPL_PRIVMSG(client.get_nick(), client.get_user(), trim(*i), args_sp[1], client.get_servername()));
 			else if(channels.find(trim(*i)) != channels.end())
-				channels[trim(*i)].sendToAll(client, msg, "PRIVMSG", 1);
+				channels[trim(*i)].sendToAll(client, RPL_PRIVMSG(client.get_nick(), client.get_user(), trim(*i), args_sp[1], client.get_servername()), "PRIVMSG", 1);
 			else
 				client.send_msg(ERR_NOSUCHNICK(client.get_nick(),std::string(trim(*i))));
 		}
