@@ -135,7 +135,7 @@ void Channel::addMember(Client *member)
 		if (this->isInChan(member) == false){
 
 			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
-			member->send_msg(RPL_JOIN(member->get_id(), name));
+			// member->send_msg(RPL_JOIN(member->get_id(), name));
 	 		welcome(member);
 		}
 		if (this->isInvited(member) == true)
@@ -158,6 +158,8 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 		}
 		// sent[member->get_nick()] = member;
 		// }
+		else 
+			member->send_msg(msg);
 	}
 
 	return (msg);

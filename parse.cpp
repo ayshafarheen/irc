@@ -95,7 +95,6 @@ void Server::command_join_parsing(const std::string &args, Client &client)
     {
         chan = join.back();
         join.pop_back();
-		std::cout << join.front() << std::endl;
 		itr = channels.find(chan);
         if (validChan(chan) == 1)
         {
