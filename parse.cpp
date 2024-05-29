@@ -87,16 +87,6 @@ void Server::command_join_parsing(const std::string &args, Client &client)
         std::getline(strm, chan, ',');
         join.push_back(chan);
     }
-	// if(args.length() == 0)
-	// {
-	// 	client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "JOIN", getservbyname()));
-	// 	return ;
-	// }
-	// if(args.length() == 0)
-	// {
-	// 	client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "JOIN", getservbyname()));
-	// 	return ;
-	// }
     if (args.size() > 1)
     {
         pass = args[1];
@@ -105,6 +95,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
     {
         chan = join.back();
         join.pop_back();
+		std::cout << join.front() << std::endl;
 		itr = channels.find(chan);
         if (validChan(chan) == 1)
         {
@@ -112,20 +103,13 @@ void Server::command_join_parsing(const std::string &args, Client &client)
              {
                 channels[chan] = Channel(chan, &client);
 				channels[chan].setOper(&client);
-				return ;
 			 }
 			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
 				return client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
-			else if ((channels[chan].getHasPass() == true) && !pass.empty() && channels[chan].getKey() != pass)
-				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
-			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
-				return client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
-			else if ((channels[chan].getHasPass() == true) && !pass.empty() && channels[chan].getKey() != pass)
-				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 			// pss needed for mode
-			else if(channels[chan].getPasswordNeeded() == true && pass.empty())
+			else if(channels[chan].getPasswordNeeded() == true && pass.empty() && channels[chan].getKey() != pass)
 				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
-			else if (channels[chan].getInviteOnlyMode() == true && (!channels[chan].isInvited(client.get_nick())))
+			else if (channels[chan].getInviteOnlyMode() == true && (!channels[chan].isInvited(&client)))
 				return client.send_msg(ERR_INVITEONLYCHAN(client.get_nick(),chan, client.get_servername()));
 			// added because of the mode
 			channels[chan].addMember(&client);
@@ -196,10 +180,9 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	std::vector<std::string >::iterator ite;
 	std::string chan = vec[1];
 	std::string to_invite = vec[0];
-	std::cout<< "\nadfhkeahbf " << to_invite << "gfdgS" << std::endl;
 	itChan itr = channels.find(chan);
 	itCli dest = auth_clients.find(to_invite);
-	if (channels[chan].isOper(client.get_nick()))
+	if (channels[chan].isOper(&client) == true)
 	{
 		if (itr == channels.end())
 			 return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
@@ -213,7 +196,8 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 			return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
 		}
 	}
-	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
+	else
+		return client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 }
 
 

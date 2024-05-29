@@ -6,7 +6,7 @@ Channel::Channel()
 
 Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 {
-	topic = "[NULL]";
+	topic = "";
 	joined.insert(std::pair<std::string, Client *>(maker->get_nick(), maker));
 	this->isInv = false;
 	this->hasPass = false;
@@ -109,19 +109,19 @@ void	Channel::setOper(Client *member)
 		}
 	}
 }
-bool Channel::isOper(std::string nick)
+bool Channel::isOper(Client *member)
 {
 	ite inv;
 
-    inv = opers.find(nick);
-    if (inv == opers.end())
+    inv = opers.find(member->get_nick());
+    if (inv == opers.end() && !member->getOper())
         return false;
     return true;
 }
-bool Channel::isInvited( std::string Nick ) {
+bool Channel::isInvited(Client *member) {
     ite inv;
 
-    inv = invited.find(Nick);
+    inv = invited.find(member->get_nick());
     if (inv == invited.end())
         return false;
     return true;
@@ -129,20 +129,19 @@ bool Channel::isInvited( std::string Nick ) {
 
 void Channel::addMember(Client *member)
 {
-		if (this->isInChan(member) == true){
-			std::cout <<"dfsfs" <<std::endl;
+		if (this->getSize() > 1 && this->isInChan(member) == true){
 			return member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
 		}
 		if (this->isInChan(member) == false){
 
 			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
+			member->send_msg(RPL_JOIN(member->get_id(), name));
+	 		welcome(member);
 		}
-		if (this->isInvited(member->get_nick()) == true)
+		if (this->isInvited(member) == true)
 		{
 			invited.erase(member->get_nick());
 		}
-	 sendToAll(*member, RPL_JOIN(member->get_id(), ), "JOIN", true);
-	 welcome(member);
 }
 
 std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd, bool chan)
@@ -206,7 +205,11 @@ std::string Channel::getMemberList()
 	ite itr;
 	for (itr = joined.begin(); itr !=  joined.end(); itr++)
 	{
-		list += itr->second->get_nick() + " ";
+		ite opit = opers.find(itr->second->get_nick());
+		if (itr->second->get_nick() == opit->first)
+			list += '@' + itr->second->get_nick() + " ";
+		else
+			list += itr->second->get_nick() + " ";
 	}
 	return list;
 }
@@ -214,7 +217,9 @@ std::string Channel::getMemberList()
 void	Channel::welcome(Client *member)
 {
 	this->sendToAll(*member, RPL_JOIN(member->get_id(), name), "JOIN", true);
-	member->send_msg(RPL_TOPIC(member->get_nick(), name, this->getTopic(), member->get_servername()));
-	member->send_msg(RPL_NAMREPLY(member->get_nick(), name, this->getMemberList(), member->get_servername()));
+	// member->send_msg(MODE_CHANNELMSG(name, ))
+	if (!this->getTopic().empty())
+		member->send_msg(RPL_TOPIC(member->get_nick(), name, this->getTopic(), member->get_servername()));
+	member->send_msg(RPL_NAMREPLY(member->get_nick(),'@', name, this->getMemberList()));
 	member->send_msg(RPL_ENDOFNAMES(member->get_nick(), name, member->get_servername()));
 }

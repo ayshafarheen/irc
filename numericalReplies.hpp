@@ -21,7 +21,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 # define ERR_INVITEONLYCHAN(client, channel, server) (":" + server+ " 473 " + client + " " + channel + " :Cannot join channel (+i)")
 # define ERR_NOSUCHCHANNEL(client, channel, server) (":" + server+ " 403 " + client + " " + channel + " :No such channel\r\n")
 # define ERR_NOTONCHANNEL(client, channel, server) (":" + server+ " 442 " + client +  " "+ channel + " :The user is not on this channel.\r\n")
-# define ERR_USERONCHANNEL(client, nick, channel, server) (":" + server+ " 443 " + client + " " + nick + " #" + channel + " :Is already on channel\r\n")
+# define ERR_USERONCHANNEL(client, nick, channel, server) (":" + server+ " 443 " + client + " " + nick + " " + channel + " :Is already on channel\r\n")
 # define RPL_INVITING(user_id, client, nick, channel) (user_id + " 341 " + client + " " + nick + " " + channel + "\r\n")
 # define RPL_INVITE(user_id, invited, channel) (user_id + " INVITE " + invited + " " + channel + "\r\n")
 
@@ -68,7 +68,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 
 
 // NAMES
-# define RPL_NAMREPLY(client, channel, list_of_nicks, server) (":" + server+ " 353 " + client + " "  + channel + " :" + list_of_nicks + "\r\n")
+# define RPL_NAMREPLY(client, symbol, channel, list_of_nicks) (":localhost 353 " + client + " " + symbol + " " + channel + " :" + list_of_nicks + "\r\n")
 # define RPL_ENDOFNAMES(client, channel, server) (":" + server+ " 366 " + client +  " " + channel + " :End of /NAMES list.\r\n")
 
 // NICK
