@@ -87,11 +87,6 @@ void Server::command_join_parsing(const std::string &args, Client &client)
         std::getline(strm, chan, ',');
         join.push_back(chan);
     }
-	// if(args.length() == 0)
-	// {
-	// 	client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "JOIN", getservbyname()));
-	// 	return ;
-	// }
     if (args.size() > 1)
     {
         pass = args[1];
@@ -100,6 +95,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
     {
         chan = join.back();
         join.pop_back();
+		std::cout << join.front() << std::endl;
 		itr = channels.find(chan);
         if (validChan(chan) == 1)
         {
@@ -107,16 +103,13 @@ void Server::command_join_parsing(const std::string &args, Client &client)
              {
                 channels[chan] = Channel(chan, &client);
 				channels[chan].setOper(&client);
-				return ;
-             }
+			 }
 			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
 				return client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
-			else if ((channels[chan].getHasPass() == true) && !pass.empty() && channels[chan].getKey() != pass)
-				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 			// pss needed for mode
-			else if(channels[chan].getPasswordNeeded() == true && pass.empty())
+			else if(channels[chan].getPasswordNeeded() == true && pass.empty() && channels[chan].getKey() != pass)
 				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
-			else if (channels[chan].getInviteOnlyMode() == true && (channels[chan].isInvited(client.get_nick())== false))
+			else if (channels[chan].getInviteOnlyMode() == true && (!channels[chan].isInvited(&client)))
 				return client.send_msg(ERR_INVITEONLYCHAN(client.get_nick(),chan, client.get_servername()));
 			// added because of the mode
 			channels[chan].addMember(&client);
@@ -187,23 +180,24 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	std::vector<std::string >::iterator ite;
 	std::string chan = vec[1];
 	std::string to_invite = vec[0];
-	std::cout<< "\nadfhkeahbf " << to_invite << std::endl;
 	itChan itr = channels.find(chan);
-	itCli dest = clients.find(to_invite);
-	// itCli invitee = clients.find(to_invite);
-	if (itr == channels.end())
-		 return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
-	else if (dest == clients.end())
-			return client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
-	else if ((channels[chan].isInChan(&dest->second) == true))
-			return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
-	else
+	itCli dest = auth_clients.find(to_invite);
+	if (channels[chan].isOper(&client) == true)
 	{
-		 return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
-		 channels[chan].addToInvite(to_invite, dest->second, &client );
-		return ;
+		if (itr == channels.end())
+			 return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
+		else if (dest == clients.end())
+			return client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
+		else if ((channels[chan].isInChan(&dest->second) == true))
+			return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
+		else
+		{
+		 	channels[chan].addToInvite(to_invite, &dest->second, &client );
+			return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
+		}
 	}
-	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
+	else
+		return client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 }
 
 
@@ -388,33 +382,50 @@ void Server::command_topic_parsing(const std::string &args, Client &client)
 }
 
 
+
 void Server::command_nick_parsing(const std::string &args, Client &client)
 {
-	if (auth_clients.find(client.get_nick()) != auth_clients.end())
+	std::string nick = trim(args);
+	if(!strchr(nick.c_str(), ' '))
 	{
-		client.send_msg(ERR_NICKNAMEINUSE((client.get_nick().empty() ? "*" : client.get_nick()),client.get_nick(), client.get_servername()));
+		if (auth_clients.find(nick) != auth_clients.end())
+		{
+			client.send_msg(ERR_NICKNAMEINUSE((client.get_nick().empty() ? "*" : client.get_nick()),client.get_nick(), client.get_servername()));
+		}
+		else
+		{
+			if(nick.empty())
+			{
+				client.send_msg(ERR_NONICKNAMEGIVEN((client.get_nick().empty() ? "*" : client.get_nick()), client.get_servername()));
+			}
+			else if(Client::invalid_nick(nick))
+			{
+				client.send_msg( ERR_ERRONEUSNICKNAME((client.get_nick().empty() ? "*" : client.get_nick()), client.get_nick(), client.get_servername()));
+			}
+			else if (auth_clients.find(nick) == auth_clients.end())
+			{
+
+				if(!client.get_nick().empty())
+				{
+					std::string oldnick = client.get_nick();
+					client.set_nick(nick);
+					auth_clients[client.get_nick()] = auth_clients.find(oldnick)->second;
+					auth_clients.erase(oldnick);
+					for (std::map<std::string,Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
+						((*i).second).change_in_all(oldnick, client);
+				}
+				else
+				{
+					client.set_nick(nick);
+					authenticate(client);
+				}
+			}
+			else
+				client.send_msg(ERR_NICKNAMEINUSE((client.get_nick().empty() ? "*" : client.get_nick()), nick, client.get_servername()));
+		}
 	}
 	else
-	{
-		std::string nick = args;
-		if(nick.empty())
-		{
-			client.send_msg(ERR_NONICKNAMEGIVEN((client.get_nick().empty() ? "*" : client.get_nick()), client.get_servername()));
-		}
-		else if(Client::invalid_nick(nick))
-		{
-			client.send_msg( ERR_ERRONEUSNICKNAME((client.get_nick().empty() ? "*" : client.get_nick()), client.get_nick(), client.get_servername()));
-		}
-		else if (auth_clients.find(nick) == auth_clients.end())
-		{
-			client.set_nick(nick);
-			authenticate(client);
-		}
-		else {
-			client.send_msg(ERR_NICKNAMEINUSE((client.get_nick().empty() ? "*" : client.get_nick()), nick, client.get_servername()));
-			// clients.erase(std::to_string(client.get_fd()));
-		}
-	}
+		client.send_msg( ERR_ERRONEUSNICKNAME((client.get_nick().empty() ? "*" : client.get_nick()), client.get_nick(), client.get_servername()));
 }
 
 void Server::command_pass_parsing(const std::string &args, Client &client)

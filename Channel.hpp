@@ -45,6 +45,7 @@ class Channel
 	bool					topicMode;
 
 	public:
+public:
 			Channel();
 			Channel(std::string serv_name, Client *maker);
 			~Channel();
@@ -57,6 +58,7 @@ class Channel
 			int 		getSize();
 			std::string getKey();
 			bool getHasPass();
+			bool isOper(Client *member);
 			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
 			void kickMember(Client *member, const std::string &reason);
 			bool isInChan(Client *member);
@@ -69,8 +71,15 @@ class Channel
 			bool getTopicMode();
 			bool getPasswordNeeded();
 			void callModeFucntion(Client *member, std::string flag);
-			void	addToInvite(std::string name, Client &client, Client *invitor);
-			bool isInvited(std::string Nick);
+			void	addToInvite(std::string name, Client *client, Client *invitor);
+			bool isInvited(Client *member);
+			std::string getMemberList();
+			void	welcome(Client *member);
+			void change_in_all(std::string oldnick, Client &client);
+
+			// void	change_in_joined(std::string name, Client &client, std::map<std::string,Channel>::iterator);
+			// void	change_in_invited(std::string name, Client &client, std::map<std::string,Channel>::iterator);
+			// void	change_in_opers(std::string name, Client &client, std::map<std::string,Channel>::iterator);
 };
 
 #endif
