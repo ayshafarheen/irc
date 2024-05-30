@@ -224,22 +224,34 @@ void	Channel::welcome(Client *member)
 	member->send_msg(RPL_ENDOFNAMES(member->get_nick(), name, member->get_servername()));
 }
 
-void Channel::change_in_all(std::string oldnick, Client &client)
+void Channel::change_in_all(std::string oldnick, Client &client,std::string cmd)
 {
 	// std::cout << "pls work " << joined.find(oldnick)->second->get_nick() << std::endl;
-	if(joined.find(oldnick) != joined.end())
+	if(cmd == "NICK")
 	{
-		joined[client.get_nick()] = &client;
-		joined.erase(oldnick);
+		if(joined.find(oldnick) != joined.end())
+		{
+			joined[client.get_nick()] = &client;
+			joined.erase(oldnick);
+		}
+		if(invited.find(oldnick) != invited.end())
+		{
+		invited[client.get_nick()] = &client;
+		invited.erase(oldnick);
+		}
+		if(opers.find(oldnick) != opers.end())
+		{
+		opers[client.get_nick()] = &client;
+		opers.erase(oldnick);
+		}
 	}
-	if(invited.find(oldnick) != invited.end())
+	else if(cmd == "LEAVE")
 	{
-	invited[client.get_nick()] = &client;
-	invited.erase(oldnick);
-	}
-	if(opers.find(oldnick) != opers.end())
-	{
-	opers[client.get_nick()] = &client;
-	opers.erase(oldnick);
+		if(joined.find(client.get_nick()) != joined.end())
+			joined.erase(client.get_nick());
+		if(invited.find(client.get_nick()) != invited.end())
+			invited.erase(client.get_nick());
+		if(opers.find(client.get_nick()) != opers.end())
+			opers.erase(client.get_nick());
 	}
 }
