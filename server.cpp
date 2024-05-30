@@ -133,10 +133,6 @@ int Server::accept_new_connection(int server)
 	std::string val = to_string(clientSocket);
 	clients[val] = client1;
 	std::cout << "Accepted new connection: " << clients[val].get_hostname() << std::endl;
-	// for (std::map<std::string,Client>::iterator i = auth_clients.begin(); i != auth_clients.end(); ++i)
-	// 	{
-	// 		std::cout << "HERE!!!! "<<(*i).first << std::endl;
-	// 	}
 	return clientSocket;
 }
 
