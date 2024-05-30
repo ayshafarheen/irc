@@ -15,6 +15,7 @@ Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 	this->inviteOnly = false;
 	this->topicMode = false;
 	this->passwordNeeded = false;
+	this->limitMode = false;
 	setOper(maker);
 	welcome(maker);
 }
@@ -26,6 +27,11 @@ Channel::~Channel()
 bool	Channel::getInviteOnlyMode()
 {
 	return (this->inviteOnly);
+}
+
+bool	Channel::getlimitMode()
+{
+	return (this->limitMode);
 }
 
 bool	Channel::getTopicMode()

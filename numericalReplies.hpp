@@ -31,7 +31,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 # define ERR_BADCHANNELKEY(client, channel) ("475 " + client + " " + channel + " :Cannot join channel (+k)\r\n")
 
 // KICK
-# define ERR_USERNOTINCHANNEL(client, nickname, channel) ("441 " + client + " " + nickname + " #" + channel + " :They aren't on that channel\r\n")
+# define ERR_USERNOTINCHANNEL(client, nickname, channel) ("441 " + client + " " + nickname + " " + channel + " :They aren't on that channel\r\n")
 // # define ERR_CHANOPRIVSNEEDED(client, channel) ("482 " + client + " #" +  channel + " :You're not channel operator\r\n")
 # define RPL_KICK(user_id, channel, kicked, reason) (user_id + " KICK #" + channel + " " + kicked + " " + reason + "\r\n")
 
@@ -47,7 +47,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 #define RPL_UMODEIS(client, mode, server) (":" + server+ " 221 " + client + " " + mode + "\r\n")
 /* channel mode */
 #define MODE_CHANNELMSG(channel, mode, server) (":" + server+ " MODE " + channel + " " + mode + "\r\n")
-#define MODE_CHANNELMSGWITHPARAM(channel, mode, param, server) (":" + server+ " MODE #" + channel + " " + mode + " " + param + "\r\n")
+#define MODE_CHANNELMSGWITHPARAM(channel, mode, param, server) (":" + server+ " MODE " + channel + " " + mode + " " + param + "\r\n")
 #define RPL_CHANNELMODEIS(client, channel, mode, server) (":" + server+ " 324 " + client + " " + channel + " " + mode + "\r\n")
 #define RPL_CHANNELMODEISWITHKEY(client, channel, mode, password, server) (":" + server+ " 324 " + client + " #" + channel + " " + mode + " " + password + "\r\n")
 #define ERR_CANNOTSENDTOCHAN(client, channel) ("404 " + client + " " + channel + " :Cannot send to channel\r\n")
