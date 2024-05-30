@@ -210,21 +210,6 @@ void	Channel::addToInvite(std::string name, Client *client, Client *invitor)
 	invitor->send_msg(RPL_INVITING(invitor->get_id(), invitor->get_nick(), client->get_nick(), this->getChanName()));
 }
 
-std::string Channel::getMemberList()
-{
-	std::string list;
-	ite itr;
-	for (itr = joined.begin(); itr !=  joined.end(); itr++)
-	{
-		std::cout << "hello " << itr->second->get_nick() << std::endl;
-		// ite opit = opers.find(itr->second->get_nick());
-		if (isOper(itr->second))
-			list += '@' + itr->second->get_nick() + " ";
-		else
-			list += itr->second->get_nick() + " ";
-	}
-	return list;
-}
 
 void	Channel::welcome(Client *member)
 {
