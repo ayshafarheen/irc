@@ -102,18 +102,17 @@ void Server::command_join_parsing(const std::string &args, Client &client)
             if (itr == channels.end())
              {
                 channels[chan] = Channel(chan, &client);
-				channels[chan].setOper(&client);
-				return ;
+
              }
 			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
-				return client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
+				client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
 			else if ((channels[chan].getHasPass() == true) && !pass.empty() && channels[chan].getKey() != pass)
-				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
+				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 			// pss needed for mode
 			else if(channels[chan].getPasswordNeeded() == true && pass.empty())
-				return client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
+				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
 			else if (channels[chan].getInviteOnlyMode() == true && (channels[chan].isInvited(&client)== false))
-				return client.send_msg(ERR_INVITEONLYCHAN(client.get_nick(),chan, client.get_servername()));
+				client.send_msg(ERR_INVITEONLYCHAN(client.get_nick(),chan, client.get_servername()));
 			// added because of the mode
 			channels[chan].addMember(&client);
         }
@@ -537,7 +536,6 @@ void Server::command_priv_parsing(const std::string &args, Client &client)
 void Server::command_motd_parsing(const std::string &args, Client &client)
 {
 	(void)args;
-	// (void)client;
 
 	std::fstream msg_file;
 	std::string msg;
@@ -596,12 +594,6 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 			}
 			if (commandMap.find(command_name) != commandMap.end())
 			{
-				std::cout << client << std::endl;
-				if (command_name.compare("motd"))
-				{
-					(this->*(commandMap[command_name]))("",client);
-				}
-				else
 					(this->*(commandMap[command_name]))(trim(commands[i].substr(command_name.length())), client);
 			}
 			else if(!client.get_nick().empty() && auth_clients.find(client.get_nick()) == auth_clients.end())

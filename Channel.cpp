@@ -213,12 +213,14 @@ void	Channel::addToInvite(std::string name, Client *client, Client *invitor)
 
 void	Channel::welcome(Client *member)
 {
-	this->sendToAll(*member, RPL_JOIN(user_id(member->get_nick(),member->get_user(), member->get_servername()), name), "JOIN", true);
+std::string msg = "\n       WELCOME TO CHANNEL " + name + " !!!\n\n";
+	this->sendToAll(*member, RPL_JOIN(member->get_id(), name), "JOIN", true);
 	// member->send_msg(MODE_CHANNELMSG(name, ))
+	member->send_msg(msg);
 	if (!this->getTopic().empty())
 		member->send_msg(RPL_TOPIC(member->get_nick(), name, this->getTopic(), member->get_servername()));
 	member->send_msg(RPL_NAMREPLY(member->get_nick(),'@', name, this->getMemberList()));
-	member->send_msg(RPL_ENDOFNAMES(member->get_nick(), name, member->get_servername()));
+	member->send_msg(RPL_ENDOFNAMES(member->get_nick(), name, member->get_servername()));;
 }
 
 void Channel::change_in_all(std::string oldnick, Client &client,std::string cmd)
