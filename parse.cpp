@@ -504,26 +504,6 @@ void Server::command_priv_parsing(const std::string &args, Client &client)
 	}
 }
 
-void Server::command_motd_parsing(const std::string &args, Client &client)
-{
-	(void)args;
-	// (void)client;
-
-	std::fstream msg_file;
-	std::string msg;
-	msg_file.open("MOTD.txt");
-	if (msg_file.is_open())
-	{
-		client.send_msg(RPL_MOTDSTART(client.get_nick(), client.get_servername()));
-		while (getline(msg_file, msg))
-		{
-			client.send_msg(RPL_MOTD(client.get_nick(),msg, client.get_servername()));
-		}
-		client.send_msg(RPL_ENDOFMOTD(client.get_nick(), client.get_servername()));
-	}
-	else
-		client.send_msg(ERR_NOMOTD(client.get_nick()));
-}
 
 // void Server::command_priv_parsing(const std::string &args, Client &client)
 // {
