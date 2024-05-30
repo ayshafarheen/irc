@@ -15,7 +15,7 @@ Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 	this->inviteOnly = false;
 	this->topicMode = false;
 	this->passwordNeeded = false;
-	maker->send_msg(RPL_JOIN(maker->get_nick(), serv_name));
+	setOper(maker);
 	welcome(maker);
 }
 
@@ -43,7 +43,7 @@ std::string Channel::getChanName()
 	return (this->name);
 }
 
-bool 	 Channel::getHasPass()
+bool 	Channel::getHasPass()
 {
 	return(hasPass);
 }
@@ -127,6 +127,19 @@ bool Channel::isInvited(Client *member) {
     return true;
 }
 
+std::string Channel::getMemberList()
+{
+	std::string list;
+	ite itr;
+	for (itr = joined.begin(); itr !=  joined.end(); itr++)
+	{
+		if (isOper(itr->second))
+			list += '@' + itr->second->get_nick() + " ";
+		else
+			list += itr->second->get_nick() + " ";
+	}
+	return list;
+}
 void Channel::addMember(Client *member)
 {
 		if (this->getSize() > 1 && this->isInChan(member) == true){
@@ -135,7 +148,6 @@ void Channel::addMember(Client *member)
 		if (this->isInChan(member) == false){
 
 			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
-			// member->send_msg(RPL_JOIN(member->get_id(), name));
 	 		welcome(member);
 		}
 		if (this->isInvited(member) == true)
@@ -153,11 +165,8 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 		if(cmd == "PRIVMSG")
 		{
 			if(member->get_fd() != client.get_fd())
-		// if (member->get_nick() != client.get_nick() && sent.find(member->get_nick()) == sent.end()){
 			member->send_msg(msg);
 		}
-		// sent[member->get_nick()] = member;
-		// }
 		else 
 			member->send_msg(msg);
 	}
@@ -201,25 +210,13 @@ void	Channel::addToInvite(std::string name, Client *client, Client *invitor)
 	invitor->send_msg(RPL_INVITING(invitor->get_id(), invitor->get_nick(), client->get_nick(), this->getChanName()));
 }
 
-std::string Channel::getMemberList()
-{
-	std::string list;
-	ite itr;
-	for (itr = joined.begin(); itr !=  joined.end(); itr++)
-	{
-		ite opit = opers.find(itr->second->get_nick());
-		if (itr->second->get_nick() == opit->first)
-			list += '@' + itr->second->get_nick() + " ";
-		else
-			list += itr->second->get_nick() + " ";
-	}
-	return list;
-}
 
 void	Channel::welcome(Client *member)
 {
+	std::string msg = "\n       WELCOME TO CHANNEL " + name + " !!!\n\n";
 	this->sendToAll(*member, RPL_JOIN(member->get_id(), name), "JOIN", true);
 	// member->send_msg(MODE_CHANNELMSG(name, ))
+	member->send_msg(msg);
 	if (!this->getTopic().empty())
 		member->send_msg(RPL_TOPIC(member->get_nick(), name, this->getTopic(), member->get_servername()));
 	member->send_msg(RPL_NAMREPLY(member->get_nick(),'@', name, this->getMemberList()));

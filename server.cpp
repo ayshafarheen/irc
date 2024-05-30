@@ -101,6 +101,7 @@ void Server::authenticate(Client &client)
 		client.send_msg(RPL_WELCOME(client.get_id(), client.get_nick(), client.get_servername()));
 		client.send_msg(RPL_YOURHOST(client.get_nick(), hostname, "1.0", client.get_servername()));
 		client.send_msg(RPL_CREATED(client.get_nick(), date_time, client.get_servername()));
+		command_motd_parsing("", client);
 	}
 }
 

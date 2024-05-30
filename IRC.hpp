@@ -100,6 +100,7 @@ class Server
 	void command_topic_parsing(const std::string &args, Client &client);
 	void command_pass_parsing(const std::string &args, Client &client);
 	void command_part_parsing(const std::string &args, Client &client);
+	void command_motd_parsing(const std::string &args, Client &client);
 
 	void authenticate(Client &client);
 	int port;

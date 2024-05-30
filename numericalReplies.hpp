@@ -61,7 +61,8 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 
 // MOTD
 #define ERR_NOSUCHSERVER(client, servername) (":" + server+ " 402 " + client + " " + servername + " :No such server\r\n")
-#define ERR_NOMOTD(client) (":" + server+ " 422 " + client + " :MOTD File is missing\r\n")
+// #define ERR_NOMOTD(client) (":" + server+ " 372 " + client + " :" + motd_line + "\r\n")
+#define ERR_NOMOTD(client) (": 422 " + client + " :MOTD File is missing\r\n")
 #define RPL_MOTDSTART(client, servername) (":" + servername+ " 375 " + client + " :- " + servername + " Message of the day - \r\n")
 #define RPL_MOTD(client, motd_line, server) (":" + server+ " 372 " + client + " :" + motd_line + "\r\n")
 #define RPL_ENDOFMOTD(client, server) (":" + server+ " 376 " + client + " :End of /MOTD command.\r\n")

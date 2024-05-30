@@ -101,7 +101,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
             if (itr == channels.end())
              {
                 channels[chan] = Channel(chan, &client);
-				channels[chan].setOper(&client);
+				// channels[chan].setOper(&client);
 			 }
 			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
 				return client.send_msg(ERR_CHANNELISFULL(client.get_nick(),chan));
@@ -262,6 +262,8 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 	ite++;
 	mode = *ite;
 	++ite;
+	if (!channels[chan].isOper(&client))
+		return client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(),chan, client.get_servername()));
 	if (vec.size() == 3)
 	{
 		user_m = *ite;
@@ -506,10 +508,29 @@ void Server::command_priv_parsing(const std::string &args, Client &client)
 // 	}
 // }
 
+void Server::command_motd_parsing(const std::string &args, Client &client)
+{
+	(void)args;
+	// (void)client;
+
+	std::fstream msg_file;
+	std::string msg;
+	msg_file.open("MOTD.txt");
+	if (msg_file.is_open())
+	{
+		client.send_msg(RPL_MOTDSTART(client.get_nick(), client.get_servername()));
+		while (getline(msg_file, msg))
+		{
+			client.send_msg(RPL_MOTD(client.get_nick(),msg, client.get_servername()));
+		}
+		client.send_msg(RPL_ENDOFMOTD(client.get_nick(), client.get_servername()));
+	}
+	else
+		client.send_msg(ERR_NOMOTD(client.get_nick()));
+}
 
 // Typedef for function pointers
 typedef void (Server::*CommandFunction)(const std::string &args, Client &client);
-
 
 void Server::parse_and_execute_client_command(const std::string &clientmsg, Client &client)
 {
@@ -531,6 +552,7 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 		commandMap.insert(std::make_pair("MODE", &Server::command_mode_parsing));
 		commandMap.insert(std::make_pair("PING", &Server::command_ping_parsing));
 		commandMap.insert(std::make_pair("PART", &Server::command_ping_parsing));
+		commandMap.insert(std::make_pair("motd", &Server::command_motd_parsing));
 		commandMap.insert(std::make_pair("PRIVMSG", &Server::command_priv_parsing));
 	}
 	std::vector<std::string> commands = ft_split(clientmsg, '\n');
@@ -552,7 +574,12 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 			if (commandMap.find(command_name) != commandMap.end())
 			{
 				// std::cout << client << std::endl;
-				(this->*(commandMap[command_name]))(trim(commands[i].substr(command_name.length())), client);
+				// if (command_name.compare("motd"))
+				// {
+				// 	(this->*(commandMap[command_name]))(,client);
+				// }
+				// else
+					(this->*(commandMap[command_name]))(trim(commands[i].substr(command_name.length())), client);
 			}
 			else if(!client.get_nick().empty() && auth_clients.find(client.get_nick()) == auth_clients.end())
 			{
