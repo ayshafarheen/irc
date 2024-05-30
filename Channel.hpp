@@ -45,6 +45,7 @@ class Channel
 	bool					topicMode;
 
 	public:
+public:
 			Channel();
 			Channel(std::string serv_name, Client *maker);
 			~Channel();
@@ -74,6 +75,10 @@ class Channel
 			bool isInvited(Client *member);
 			std::string getMemberList();
 			void	welcome(Client *member);
+			void change_in_all(std::string oldnick, Client &client);
 
+			// void	change_in_joined(std::string name, Client &client, std::map<std::string,Channel>::iterator);
+			// void	change_in_invited(std::string name, Client &client, std::map<std::string,Channel>::iterator);
+			// void	change_in_opers(std::string name, Client &client, std::map<std::string,Channel>::iterator);
 };
 #endif

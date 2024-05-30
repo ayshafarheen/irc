@@ -145,8 +145,8 @@ void Channel::addMember(Client *member)
 		if (this->getSize() > 1 && this->isInChan(member) == true){
 			return member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
 		}
-		if (this->isInChan(member) == false){
-
+		if (this->isInChan(member) == false)
+		{
 			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
 	 		welcome(member);
 		}
@@ -210,15 +210,48 @@ void	Channel::addToInvite(std::string name, Client *client, Client *invitor)
 	invitor->send_msg(RPL_INVITING(invitor->get_id(), invitor->get_nick(), client->get_nick(), this->getChanName()));
 }
 
+std::string Channel::getMemberList()
+{
+	std::string list;
+	ite itr;
+	for (itr = joined.begin(); itr !=  joined.end(); itr++)
+	{
+		std::cout << "hello " << itr->second->get_nick() << std::endl;
+		// ite opit = opers.find(itr->second->get_nick());
+		if (isOper(itr->second))
+			list += '@' + itr->second->get_nick() + " ";
+		else
+			list += itr->second->get_nick() + " ";
+	}
+	return list;
+}
 
 void	Channel::welcome(Client *member)
 {
-	std::string msg = "\n       WELCOME TO CHANNEL " + name + " !!!\n\n";
-	this->sendToAll(*member, RPL_JOIN(member->get_id(), name), "JOIN", true);
+	this->sendToAll(*member, RPL_JOIN(user_id(member->get_nick(),member->get_user(), member->get_servername()), name), "JOIN", true);
 	// member->send_msg(MODE_CHANNELMSG(name, ))
-	member->send_msg(msg);
 	if (!this->getTopic().empty())
 		member->send_msg(RPL_TOPIC(member->get_nick(), name, this->getTopic(), member->get_servername()));
 	member->send_msg(RPL_NAMREPLY(member->get_nick(),'@', name, this->getMemberList()));
 	member->send_msg(RPL_ENDOFNAMES(member->get_nick(), name, member->get_servername()));
+}
+
+void Channel::change_in_all(std::string oldnick, Client &client)
+{
+	// std::cout << "pls work " << joined.find(oldnick)->second->get_nick() << std::endl;
+	if(joined.find(oldnick) != joined.end())
+	{
+		joined[client.get_nick()] = &client;
+		joined.erase(oldnick);
+	}
+	if(invited.find(oldnick) != invited.end())
+	{
+	invited[client.get_nick()] = &client;
+	invited.erase(oldnick);
+	}
+	if(opers.find(oldnick) != opers.end())
+	{
+	opers[client.get_nick()] = &client;
+	opers.erase(oldnick);
+	}
 }
