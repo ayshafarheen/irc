@@ -228,9 +228,9 @@ bool check_mode(std::string args)
 void	Channel::callModeFucntion(Client *member, std::string flag)
 {
 	if (flag == "+i")
-		this->setInviteOnlyMode(true);
+		this->setInviteOnlyMode(*member, true);
 	if (flag == "-i")
-		this->setInviteOnlyMode(false);
+		this->setInviteOnlyMode(*member, false);
 	if (flag == "+t")
 		this->setTopicMode(true);
 	if (flag == "-t")

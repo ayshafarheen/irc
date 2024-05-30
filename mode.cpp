@@ -6,9 +6,13 @@
 // + to set and - to remove
 // + is true and - is false
 
-void Channel::setInviteOnlyMode(bool enable)
+void Channel::setInviteOnlyMode(Client &client, bool enable)
 {
     this->inviteOnly = enable;
+	if (enable == true)
+		sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "+i", client.get_servername()), "MODE", true);
+	else
+		sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "-i", client.get_servername()), "MODE", true);
 }
 
 void Channel::setPasswordNeeded(bool enable)

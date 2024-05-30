@@ -46,9 +46,9 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 #define ERR_USERSDONTMATCH(client) ("502 " + client + " :Cant change mode for other users\r\n")
 #define RPL_UMODEIS(client, mode, server) (":" + server+ " 221 " + client + " " + mode + "\r\n")
 /* channel mode */
-#define MODE_CHANNELMSG(channel, mode, server) (":" + server+ " MODE #" + channel + " " + mode + "\r\n")
+#define MODE_CHANNELMSG(channel, mode, server) (":" + server+ " MODE " + channel + " " + mode + "\r\n")
 #define MODE_CHANNELMSGWITHPARAM(channel, mode, param, server) (":" + server+ " MODE #" + channel + " " + mode + " " + param + "\r\n")
-#define RPL_CHANNELMODEIS(client, channel, mode, server) (":" + server+ " 324 " + client + " #" + channel + " " + mode + "\r\n")
+#define RPL_CHANNELMODEIS(client, channel, mode, server) (":" + server+ " 324 " + client + " " + channel + " " + mode + "\r\n")
 #define RPL_CHANNELMODEISWITHKEY(client, channel, mode, password, server) (":" + server+ " 324 " + client + " #" + channel + " " + mode + " " + password + "\r\n")
 #define ERR_CANNOTSENDTOCHAN(client, channel) ("404 " + client + " " + channel + " :Cannot send to channel\r\n")
 #define ERR_CHANNELISFULL(client, channel) ("471 " + client + " " + channel + " :Cannot join channel (+l)\r\n")

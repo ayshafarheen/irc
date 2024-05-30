@@ -63,7 +63,7 @@ public:
 			void kickMember(Client *member, const std::string &reason);
 			bool isInChan(Client *member);
 			void memberQuit(Client *member, const std::string &reason);
-			void setInviteOnlyMode(bool enable);
+			void setInviteOnlyMode(Client &client, bool enable);
 			void setPasswordNeeded(bool enable);
 			void setPrivilageMode(Client *member, bool enable);
 			void setTopicMode(bool enable);

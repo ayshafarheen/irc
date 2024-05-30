@@ -170,7 +170,6 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 		else 
 			member->send_msg(msg);
 	}
-
 	return (msg);
 }
 
