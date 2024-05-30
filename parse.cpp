@@ -394,7 +394,7 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
 	{
 		if (auth_clients.find(nick) != auth_clients.end())
 		{
-			client.send_msg(ERR_NICKNAMEINUSE((client.get_nick().empty() ? "*" : client.get_nick()),client.get_nick(), client.get_servername()));
+			client.send_msg(ERR_NICKNAMEINUSE((client.get_nick().empty() ? "*" : client.get_nick()),nick, client.get_servername()));
 		}
 		else
 		{
@@ -416,11 +416,7 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
 					auth_clients[client.get_nick()] = client;
 					auth_clients.erase(oldnick);
 					for (std::map<std::string,Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
-						((*i).second).change_in_all(oldnick, client);
-					// for (std::map<std::string,Client>::iterator i = auth_clients.begin(); i != auth_clients.end(); ++i)
-					// {
-					// 	std::cout << "HERE!!!! "<<(*i).first <<  " " <<(*i).second.get_nick() <<std::endl;
-					// }
+						((*i).second).change_in_all(oldnick, client, "NICK");
 					client.send_msg(RPL_NICK(oldnick,client.get_user(),client.get_nick(), client.get_servername()));
 				}
 				else
@@ -439,19 +435,26 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
 
 void Server::command_pass_parsing(const std::string &args, Client &client)
 {
-	if(args != Server::get_pass())
+	if(auth_clients.find(client.get_nick()) == auth_clients.end())
 	{
-		client.send_msg(ERR_PASSWDMISMATCH((client.get_nick().empty() ? "*" : client.get_nick()), client.get_servername()));
-		FD_CLR(client.get_fd(), &current_sockets);
-		close(client.get_fd());
-		clients.erase(to_string(client.get_fd()));
-		throw(1);
+		if(args != Server::get_pass())
+		{
+			client.send_msg(ERR_PASSWDMISMATCH((client.get_nick().empty() ? "*" : client.get_nick()), client.get_servername()));
+			FD_CLR(client.get_fd(), &current_sockets);
+			close(client.get_fd());
+			clients.erase(to_string(client.get_fd()));
+			for (std::map<std::string,Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
+				((*i).second).change_in_all("", client, "LEAVE");
+			throw(1);
+		}
+		else
+		{
+			client.set_auth(1);
+			authenticate(client);
+		}
 	}
 	else
-	{
-		client.set_auth(1);
-		authenticate(client);
-	}
+		client.send_msg(ERR_ALREADYREGISTERED(client.get_nick(), client.get_servername()));
 }
 
 void Server::command_cap_parsing(const std::string &args, Client &client)
@@ -492,7 +495,6 @@ void Server::command_priv_parsing(const std::string &args, Client &client)
 		std::vector<std::string> receivers = ft_split(args_sp[0], ',');
 		for (std::vector<std::string>::iterator i = receivers.begin(); i != receivers.end(); ++i)
 		{
-			// std::string msg = client.get_nick() + ": " + args_sp[1] + "\r\n";
 			if(auth_clients.find(trim(*i)) != auth_clients.end())
 				auth_clients[trim(*i)].send_msg(RPL_PRIVMSG(client.get_nick(), client.get_user(), trim(*i), args_sp[1], client.get_servername()));
 			else if(channels.find(trim(*i)) != channels.end())
@@ -567,9 +569,9 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
     commandMap.insert(std::make_pair("NICK", &Server::command_nick_parsing));
 	commandMap.insert(std::make_pair("PASS", &Server::command_pass_parsing));
     commandMap.insert(std::make_pair("QUIT", &Server::command_quit_parsing));
-	if(client.get_auth())
+	if(auth_clients.find(client.get_nick()) != auth_clients.end())
 	{
-    	commandMap.insert(std::make_pair("JOIN", &Server::command_join_parsing));
+		commandMap.insert(std::make_pair("JOIN", &Server::command_join_parsing));
 		commandMap.insert(std::make_pair("TOPIC", &Server::command_topic_parsing));
 		commandMap.insert(std::make_pair("KICK", &Server::command_kick_parsing));
 		commandMap.insert(std::make_pair("INVITE", &Server::command_invite_parsing));
@@ -590,11 +592,8 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 			command_name = first_word(commands[i]);
 			if (command_name.empty())
 			{
-				// No command / invalid
-				// TODO: print something
 				return;
 			}
-			// Call the function associated with the command name
 			if (commandMap.find(command_name) != commandMap.end())
 			{
 				std::cout << client << std::endl;
@@ -607,7 +606,6 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 			}
 			else if(!client.get_nick().empty() && auth_clients.find(client.get_nick()) == auth_clients.end())
 			{
-				// TODO: change the message
 				std::cerr << "Error: Unsupported command" << std::endl;
 			}
 		}

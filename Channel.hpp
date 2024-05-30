@@ -75,7 +75,7 @@ public:
 			bool isInvited(Client *member);
 			std::string getMemberList();
 			void	welcome(Client *member);
-			void change_in_all(std::string oldnick, Client &client);
+			void change_in_all(std::string oldnick, Client &client, std::string cmd);
 
 			// void	change_in_joined(std::string name, Client &client, std::map<std::string,Channel>::iterator);
 			// void	change_in_invited(std::string name, Client &client, std::map<std::string,Channel>::iterator);

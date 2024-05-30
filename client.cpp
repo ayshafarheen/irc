@@ -27,7 +27,7 @@ void Client::receive(int clientSocket, fd_set &current_sockets, std::map<std::st
 	{
 		std::cout << "Connection closed! " << std::endl;
 		FD_CLR(clientSocket, &current_sockets);
-		if(auth_clients.find(clients.find(Server::to_string(clientSocket))->second.get_nick()) != auth_clients.end() && clients.find(Server::to_string(clientSocket))->second.get_fd() == clientSocket)
+		if(auth_clients.find(nickname) != auth_clients.end() && (auth_clients.find(nickname)->second.get_fd() == clientSocket))
 			auth_clients.erase(Server::to_string(clientSocket));
 		clients.erase(Server::to_string(clientSocket));
 		close(clientSocket);
