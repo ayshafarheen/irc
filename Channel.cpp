@@ -147,8 +147,13 @@ void Channel::addMember(Client *member)
 		}
 		if (this->isInChan(member) == false)
 		{
-			joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
-	 		welcome(member);
+			if (this->getInviteOnlyMode() && this->isInvited(member) == true)
+			{
+				joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
+	 			welcome(member);
+			}
+	
+
 		}
 		if (this->isInvited(member) == true)
 		{
