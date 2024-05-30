@@ -356,31 +356,38 @@ void Server::command_user_parsing(const std::string &args, Client &client)
 void Server::command_topic_parsing(const std::string &args, Client &client)
 {
 	std::vector<std::string> args_sp = ft_split(args, ':');
-	if (args_sp.size() == 2 || args_sp.size() == 1)
+	if(args_sp.size() == 2 || args_sp.size() == 1)
 	{
 		std::string channel = trim(std::string(args_sp[0]));
-		if (channels.find(channel) == channels.end())
-			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), args_sp[0], client.get_servername()));
-		else if (!channels[channel].isInChan(&client))
-			client.send_msg(ERR_NOTONCHANNEL(client.get_nick(), args_sp[0], client.get_servername()));
+		if(channels.find(channel) == channels.end())
+			client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(),args_sp[0], client.get_servername()));
+		else if(!channels[channel].isInChan(&client))
+			client.send_msg(ERR_NOTONCHANNEL(client.get_nick(),args_sp[0], client.get_servername()));
 		// checking if the mode is restricted or no
-		else if (channels[channel].getTopicMode() == true && !channels[channel].isOper(&client))
-			client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), channels[channel].getChanName(), client.get_servername()));
+		else if (channels[channel].getTopicMode() && channels[channel].isOper(&client) == false)
+			client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(),channel ,client.get_servername()));
 		// havent got the correct reply but working
-		else if (args_sp.size() == 1)
-			if (channels[channel].getTopic().empty())
-				client.send_msg(RPL_NOTOPIC(client.get_nick(), args_sp[0], client.get_servername()));
-			else
-				client.send_msg(RPL_TOPIC(client.get_nick(), args_sp[0], channels[channel].getTopic(), client.get_servername()));
-		else if (args_sp.size() == 1 && args.find(':'))
-			channels[channel].setTopic("");
-		else if (args_sp.size() == 2)
+		else if(args_sp.size() == 2)
 		{
+			client.send_msg(RPL_TOPIC_CHANGE(client.get_nick(),client.get_user(), channel,std::string(args_sp[1]), client.get_servername()));
 			channels[channel].setTopic(std::string(args_sp[1]));
+		}
+		else if(args_sp.size() == 1 && args.find(':'))
+		{
+			channels[channel].setTopic("");
+			client.send_msg(RPL_TOPIC_CHANGE(client.get_nick(),client.get_user(), channel,std::string(args_sp[1]), client.get_servername()));
+		}
+		else if(args_sp.size() == 1)
+		{
+			if(channels[channel].getTopic().empty())
+				client.send_msg(RPL_NOTOPIC(client.get_nick(),args_sp[0], client.get_servername()));
+			else
+				client.send_msg(RPL_TOPIC(client.get_nick(),args_sp[0],channels[channel].getTopic(), client.get_servername()));
 		}
 	}
 	else
 		client.send_msg(ERR_NEEDMOREPARAMS((client.get_nick()), "TOPIC", client.get_servername()));
+
 }
 
 void Server::command_nick_parsing(const std::string &args, Client &client)
