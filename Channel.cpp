@@ -104,6 +104,14 @@ void Channel::setOper(Client *member)
 		}
 	}
 }
+
+void Channel::erase()
+{
+	invited.clear();
+	opers.clear();
+	joined.clear();
+}
+
 bool Channel::isOper(Client *member)
 {
 	ite inv;

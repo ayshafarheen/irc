@@ -25,6 +25,7 @@
 #include "Commands.hpp"
 
 
+class Channel;
 class Client
 {
 	std::string nickname;
@@ -57,7 +58,7 @@ class Client
 	std::string get_nick() const;
 	void set_hostname(std::string newmsg);
 	void set_servername(std::string newmsg);
-	void receive(int socket, fd_set &current_sockets, std::map<std::string, Client> & clients, std::map<std::string, Client> & auth_clients);
+	void receive(int socket, fd_set &current_sockets, std::map<std::string, Client> & clients, std::map<std::string, Client> & auth_clients,std::map<std::string, Channel> & channels);
 	void set_id(std::string newmsg);
 	void set_realname(std::string newmsg);
 	std::string get_hostname() const;
@@ -73,7 +74,6 @@ class Client
 
 std::ostream& operator<<(std::ostream& out, const Client &client);
 
-class Channel;
 class Server
 {
 	private:

@@ -5,11 +5,10 @@ int Server::server = 0;
 
 void Server::clear_all()
 {
-	// for (std::map<std::string,Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
-	// {
-	// 	std::cout << ((*i).second).get_fd() << std::endl;
-	// 	close((((*i).second)).get_fd());
-	// }
+	for (std::map<std::string,Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
+	{
+		i->second.erase();
+	}
 	clients.clear();
 	auth_clients.clear();
 	channels.clear();
@@ -123,7 +122,7 @@ void Server::authenticate(Client &client)
 void Server::handle_connection(int clientSocket)
 {
 	Client &client = clients[to_string(clientSocket)];
-	client.receive(clientSocket, current_sockets, clients, auth_clients);
+	client.receive(clientSocket, current_sockets, clients, auth_clients, channels);
 	if(clients.find(Server::to_string(clientSocket)) != clients.end())
 		parse_and_execute_client_command(client.get_msg(), client);
 }
@@ -214,6 +213,12 @@ void Server::commandQuit(Client *member, const std::string reason)
 		ite->second.memberQuit(member, reason);
 	}
 	if(auth_clients.find(member->get_nick()) != auth_clients.end())
+	{
+		for (std::map<std::string,Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
+		{
+			i->second.change_in_all("",auth_clients.find(member->get_nick())->second,"LEAVE");
+		}
 		auth_clients.erase(member->get_nick());
-	clients.erase(Server::to_string(member->get_fd()));
+		clients.erase(Server::to_string(member->get_fd()));
+	}
 }

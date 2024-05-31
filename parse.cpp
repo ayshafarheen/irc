@@ -406,13 +406,13 @@ void Server::command_topic_parsing(const std::string &args, Client &client)
 		// havent got the correct reply but working
 		else if (args_sp.size() == 2)
 		{
-			client.send_msg(RPL_TOPIC_CHANGE(client.get_nick(), client.get_user(), channel, std::string(args_sp[1]), client.get_servername()));
+			channels[channel].sendToAll(client,RPL_TOPIC_CHANGE(client.get_nick(), client.get_user(), channel, std::string(args_sp[1]), client.get_servername()), "TOPIC", true);
 			channels[channel].setTopic(std::string(args_sp[1]));
 		}
 		else if (args_sp.size() == 1 && args.find(':'))
 		{
 			channels[channel].setTopic("");
-			client.send_msg(RPL_TOPIC_CHANGE(client.get_nick(), client.get_user(), channel, std::string(args_sp[1]), client.get_servername()));
+			channels[channel].sendToAll(client,RPL_TOPIC_CHANGE(client.get_nick(), client.get_user(), channel, std::string(args_sp[1]), client.get_servername()), "TOPIC", true);
 		}
 		else if (args_sp.size() == 1)
 		{
