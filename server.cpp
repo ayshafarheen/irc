@@ -133,7 +133,7 @@ int Server::accept_new_connection(int server)
 	Client client1(clientSocket);
 	if (clientSocket == -1)
 		return -1;
-	 fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+	fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 	std::string val = to_string(clientSocket);
 	clients[val] = client1;
 	std::cout << "Accepted new connection: " << clients[val].get_hostname() << std::endl;
