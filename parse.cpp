@@ -96,7 +96,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 		join.pop_back();
 		itr = channels.find(chan);
 		if (validChan(chan) == true)
-		{			
+		{
 			if (itr == channels.end())
 			{
 				channels[chan] = Channel(chan, &client);
@@ -693,7 +693,7 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 			}
 			else if (!client.get_nick().empty() && auth_clients.find(client.get_nick()) == auth_clients.end())
 			{
-				std::cerr << "Error: Unsupported command" << std::endl;
+				client.send_msg("Error: Unsupported command\r\n");
 			}
 		}
 	}

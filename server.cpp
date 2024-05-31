@@ -221,4 +221,8 @@ void Server::commandQuit(Client *member, const std::string reason)
 		auth_clients.erase(member->get_nick());
 		clients.erase(Server::to_string(member->get_fd()));
 	}
+	for (std::map<std::string,Client>::iterator i = auth_clients.begin(); i != auth_clients.end(); ++i)
+	{
+		close((((*i).second)).get_fd());
+	}
 }
