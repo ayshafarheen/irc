@@ -92,7 +92,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 	if (vec.size() == 2)
 		pass = *ite;
 	ite--;
-	join = ft_split(*ite , ','); 
+	join = ft_split(*ite , ',');
 	while (!join.empty())
 	{
 		chan = join.back();
@@ -187,7 +187,7 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	{
 		if (itr == channels.end())
 			return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
-		else if (dest == clients.end())
+		else if (dest == auth_clients.end())
 			return client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite,  client.get_servername()));
 		else if ((channels[chan].isInChan(&dest->second) == true))
 			return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
@@ -201,7 +201,6 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	else
 		client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 	}
-}
 
 // if they have none of them than it's just a wrong flag
 bool check_mode(std::string args)
@@ -492,26 +491,31 @@ void Server::command_nick_parsing(const std::string &args, Client &client)
 
 void Server::command_pass_parsing(const std::string &args, Client &client)
 {
-	if (auth_clients.find(client.get_nick()) == auth_clients.end())
+	if(ft_split_whitespace(args).size() == 1)
 	{
-		if (args != Server::get_pass())
+		if (auth_clients.find(client.get_nick()) == auth_clients.end())
 		{
-			client.send_msg(ERR_PASSWDMISMATCH((client.get_nick().empty() ? "*" : client.get_nick()), client.get_servername()));
-			FD_CLR(client.get_fd(), &current_sockets);
-			close(client.get_fd());
-			clients.erase(to_string(client.get_fd()));
-			for (std::map<std::string, Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
-				((*i).second).change_in_all("", client, "LEAVE");
-			throw(1);
+			if (args != Server::get_pass())
+			{
+				client.send_msg(ERR_PASSWDMISMATCH((client.get_nick().empty() ? "*" : client.get_nick()), client.get_servername()));
+				FD_CLR(client.get_fd(), &current_sockets);
+				close(client.get_fd());
+				clients.erase(to_string(client.get_fd()));
+				for (std::map<std::string, Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
+					((*i).second).change_in_all("", client, "LEAVE");
+				throw(1);
+			}
+			else
+			{
+				client.set_auth(1);
+				authenticate(client);
+			}
 		}
 		else
-		{
-			client.set_auth(1);
-			authenticate(client);
-		}
+			client.send_msg(ERR_ALREADYREGISTERED(client.get_nick(), client.get_servername()));
 	}
 	else
-		client.send_msg(ERR_ALREADYREGISTERED(client.get_nick(), client.get_servername()));
+		client.send_msg(ERR_PASSWDMISMATCH((client.get_nick().empty() ? "*" : client.get_nick()), client.get_servername()));
 }
 
 void Server::command_cap_parsing(const std::string &args, Client &client)
