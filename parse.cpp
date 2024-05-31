@@ -92,17 +92,11 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 	if (vec.size() == 2)
 		pass = *ite;
 	ite--;
-	// while (!strm.eof())
-	// {
-	// 	std::getline(strm, chan, ',');
-	// 	join.push_back(chan);
-	// }
-	join = ft_split(*ite , ',');
+	join = ft_split(*ite , ','); 
 	while (!join.empty())
 	{
 		chan = join.back();
 		join.pop_back();
-		// std::cout << join.front() << std::endl;
 		itr = channels.find(chan);
 		if (validChan(chan) == 1)
 		{
@@ -187,7 +181,9 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 	std::string to_invite = vec[0];
 	itChan itr = channels.find(chan);
 	itCli dest = auth_clients.find(to_invite);
-	if (channels[chan].isOper(&client) == true)
+	if (vec.size() < 2)
+		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "INVITE", client.get_servername()));
+	if (channels[chan].isOper(&client))
 	{
 		if (itr == channels.end())
 			return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
@@ -198,11 +194,13 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 		else
 		{
 			channels[chan].addToInvite(to_invite, &dest->second, &client);
-			return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
+			dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
+			return client.send_msg(RPL_INVITING(user_id(client.get_nick(), client.get_user(), client.get_servername()), client.get_nick(),dest->second.get_nick(), chan));
 		}
 	}
 	else
 		client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
+	}
 }
 
 // if they have none of them than it's just a wrong flag
