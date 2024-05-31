@@ -35,8 +35,7 @@ class Channel
 	std::vector<int> clients;
 	std::map<std::string, Client *> joined;
 	std::map<std::string, Client *>	invited;
-	std::map<std::string, Client *> opers;
-	bool					isInv;
+	std::map<std::string, Client *> opers; 
 	bool					hasPass;
 	bool					topRestrict;
 	int 					usrLim;
@@ -48,7 +47,7 @@ public:
 			Channel();
 			Channel(std::string serv_name, Client *maker);
 			~Channel();
-			void addMember(Client *member);
+			void addMember(Client *member, std::string key);
 			void setOper(Client *member);
 			std::string	getChanName();
 			std::string getTopic();
@@ -76,6 +75,7 @@ public:
 			std::string getMemberList();
 			void	welcome(Client *member);
 			void change_in_all(std::string oldnick, Client &client, std::string cmd);
+			bool validEntrance(Client *member, std::string key);
 
 			// void	change_in_joined(std::string name, Client &client, std::map<std::string,Channel>::iterator);
 			// void	change_in_invited(std::string name, Client &client, std::map<std::string,Channel>::iterator);

@@ -8,7 +8,6 @@ Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 {
 	topic = "";
 	joined.insert(std::pair<std::string, Client *>(maker->get_nick(), maker));
-	this->isInv = false;
 	this->hasPass = false;
 	this->topRestrict = false;
 	this->usrLim = -1;
@@ -138,21 +137,40 @@ std::string Channel::getMemberList()
 	return list;
 }
 
-void Channel::addMember(Client *member)
+bool Channel::validEntrance(Client *member, std::string key)
 {
-	if (this->getSize() > 1 && this->isInChan(member) == true)
+	if (getHasPass() && (key.compare(getKey()) != 0))
 	{
-		return member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
+		member->send_msg(ERR_BADCHANNELKEY(member->get_nick(), name));
+		return false;
 	}
-	if (this->isInChan(member) == false)
+	if (getInviteOnlyMode() && (!isInvited(member)))
 	{
-		joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
-		welcome(member);
+		member->send_msg(ERR_INVITEONLYCHAN(member->get_nick(), name, member->get_servername()));
+		return false;
 	}
-	if (this->isInvited(member) == true)
+	if (usrLim > 0 && (this->getSize() >= usrLim))
 	{
-		invited.erase(member->get_nick());
+		member->send_msg(ERR_CHANNELISFULL(member->get_nick(),name));
+		return false;
 	}
+	return true;
+}
+
+void Channel::addMember(Client *member, std::string key)
+{
+		if (this->getSize() > 1 && this->isInChan(member) == true){
+			return member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
+		}
+		if (this->isInChan(member) == false && this->validEntrance(member,key))
+		{
+				joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
+	 			welcome(member);
+		}
+		if (this->isInvited(member) == true)
+		{
+			invited.erase(member->get_nick());
+		}
 }
 
 std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd, bool chan)
