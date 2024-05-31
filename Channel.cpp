@@ -76,10 +76,6 @@ bool Channel::isInChan(Client *member)
 		return (true);
 	else
 		return (false);
-	if (opers.find(member->get_nick()) != opers.end())
-		return (true);
-	else
-		return (false);
 }
 
 void Channel::setOper(Client *member)

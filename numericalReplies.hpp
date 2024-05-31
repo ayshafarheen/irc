@@ -47,7 +47,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 #define RPL_UMODEIS(client, mode, server) (":" + server+ " 221 " + client + " " + mode + "\r\n")
 /* channel mode */
 #define ERR_BADCHANMASK(nick,server) (":" + server + " 476 * " + nick + " :Bad Channel Mask\r\n")
-#define MODE_CHANNELMSG(channel, mode, server) (":" + server+ " MODE #" + channel + " " + mode + "\r\n")
+#define MODE_CHANNELMSG(channel, mode, server) (":" + server+ " MODE " + channel + " " + mode + "\r\n")
 #define MODE_CHANNELMSGWITHPARAM(channel, mode, param, server) (":" + server+ " MODE " + channel + " " + mode + " " + param + "\r\n")
 #define RPL_CHANNELMODEIS(client, channel, mode, server) (":" + server+ " 324 " + client + " " + channel + " " + mode + "\r\n")
 #define RPL_CHANNELMODEISWITHKEY(client, channel, mode, password, server) (":" + server+ " 324 " + client + " #" + channel + " " + mode + " " + password + "\r\n")
