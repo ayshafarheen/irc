@@ -102,6 +102,7 @@ class Server
 	void command_part_parsing(const std::string &args, Client &client);
 	void command_names_parsing(const std::string &args, Client &client);
 	void command_motd_parsing(const std::string &args, Client &client);
+	bool isValidPassword(const std::string& password);
 
 
 	
