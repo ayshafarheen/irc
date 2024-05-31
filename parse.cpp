@@ -301,9 +301,8 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 	if (mode == "+o" || mode == "-o")
 	{
 		user_m = *ite;
-		useer = clients.find(user_m); 
-		if (useer->first != user_m)
-		// if (channel->second.isInChan(&useer->second) == false)
+		useer = clients.find(user_m);
+		if (!channel->second.isInChan(&useer->second))
 			return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_m, chan));
 		if (mode == "+o")
 			channel->second.setPrivilageMode(&useer->second, true);
