@@ -41,7 +41,6 @@ class Channel
 	bool					topRestrict;
 	int 					usrLim;
 	bool					inviteOnly;
-	bool					passwordNeeded;
 	bool					topicMode;
 
 	public:
@@ -63,14 +62,15 @@ public:
 			void kickMember(Client *member, const std::string &reason);
 			bool isInChan(Client *member);
 			void memberQuit(Client *member, const std::string &reason);
-			void setInviteOnlyMode(bool enable);
-			void setPasswordNeeded(bool enable);
+			void setInviteOnlyMode(Client &client, bool enable);
+			void setPasswordNeededTrue(Client &client, std::string &password);
+			void setPasswordNeededFalse(Client &client);
 			void setPrivilageMode(Client *member, bool enable);
-			void setTopicMode(bool enable);
+			void setTopicMode(Client &client, bool enable);
+			void setUserLimit(Client &client, int limit);
 			bool getInviteOnlyMode();
 			bool getTopicMode();
 			bool getPasswordNeeded();
-			void callModeFucntion(Client *member, std::string flag);
 			void	addToInvite(std::string name, Client *client, Client *invitor);
 			bool isInvited(Client *member);
 			std::string getMemberList();

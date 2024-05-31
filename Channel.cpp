@@ -14,7 +14,6 @@ Channel::Channel(std::string serv_name, Client *maker) : name(serv_name)
 	this->usrLim = -1;
 	this->inviteOnly = false;
 	this->topicMode = false;
-	this->passwordNeeded = false;
 	setOper(maker);
 	welcome(maker);
 }
@@ -33,10 +32,6 @@ bool	Channel::getTopicMode()
 	return (this->topicMode);
 }
 
-bool	Channel::getPasswordNeeded()
-{
-	return (this->passwordNeeded);
-}
 
 std::string Channel::getChanName()
 {
@@ -56,6 +51,7 @@ std::string Channel::getTopic()
 {
 	return (this->topic);
 }
+
 int Channel::getUsrLim()
 {
 	return usrLim;
@@ -140,6 +136,7 @@ std::string Channel::getMemberList()
 	}
 	return list;
 }
+
 void Channel::addMember(Client *member)
 {
 		if (this->getSize() > 1 && this->isInChan(member) == true){
@@ -175,7 +172,6 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 		else 
 			member->send_msg(msg);
 	}
-
 	return (msg);
 }
 
