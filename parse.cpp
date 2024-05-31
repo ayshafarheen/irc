@@ -188,7 +188,7 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 		if (itr == channels.end())
 			return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
 		else if (dest == clients.end())
-			return client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite));
+			return client.send_msg(ERR_NOSUCHNICK(client.get_nick(), to_invite,  client.get_servername()));
 		else if ((channels[chan].isInChan(&dest->second) == true))
 			return client.send_msg(ERR_USERONCHANNEL(client.get_nick(), client.get_nick(), chan, client.get_servername()));
 		else
@@ -508,11 +508,12 @@ void Server::command_cap_parsing(const std::string &args, Client &client)
 {
 	if (first_word(args) == "LS")
 	{
-		client.send_msg("CAP * LS :multi-prefix sasl\r\n");
+		client.send_msg("CAP * LS :\r\n");
 	}
 	else if (first_word(args) == "REQ")
 	{
-		client.send_msg("CAP * ACK :multi-prefix\r\n");
+		std::string token = args.substr(args.find(":") + 1);
+		client.send_msg("CAP * NAK :" + token + "\r\n");
 	}
 	else
 		return;
@@ -521,7 +522,7 @@ void Server::command_cap_parsing(const std::string &args, Client &client)
 void Server::command_ping_parsing(const std::string &args, Client &client)
 {
 	std::string token = args.substr(args.find(":") + 1);
-	client.send_msg(RPL_PONG(client.get_servername(), token));
+	client.send_msg(RPL_PONG(trim(token)));
 }
 
 void Server::command_priv_parsing(const std::string &args, Client &client)
@@ -552,7 +553,7 @@ void Server::command_priv_parsing(const std::string &args, Client &client)
 				channels[trim(*i)].sendToAll(client, RPL_PRIVMSG(client.get_nick(), client.get_user(), trim(*i), args_sp[1], client.get_servername()), "PRIVMSG", 1);
 			}
 			else
-				client.send_msg(ERR_NOSUCHNICK(client.get_nick(), std::string(trim(*i))));
+				client.send_msg(ERR_NOSUCHNICK(client.get_nick(), std::string(trim(*i)), client.get_servername()));
 		}
 	}
 }

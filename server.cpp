@@ -9,9 +9,9 @@ void Server::clear_all()
 	{
 		i->second.erase();
 	}
-	clients.clear();
-	auth_clients.clear();
 	channels.clear();
+	auth_clients.clear();
+	clients.clear();
 
 }
 
@@ -39,7 +39,7 @@ void Server::serv_handle(int n)
 
 std::map<std::string, Client> &Server::get_client()
 {
-	return auth_clients;
+	return clients;
 }
 
 std::string Server::to_string(int b)
