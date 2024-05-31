@@ -226,8 +226,19 @@ void Channel::memberQuit(Client *member, const std::string &reason)
 
 	if (iter != joined.end())
 	{
-		sendToAll(*member, RPL_QUIT(user_id(member->get_nick(),member->get_user(), member->get_servername()), reason), "QUIT", true);
 		joined.erase(iter);
+		if (opers.find(member->get_nick()) != opers.end())
+			opers.erase(member->get_nick());
+		if (opers.empty())
+		{
+			// Needs to make an other user the channel operator
+			if (!joined.empty())
+			{
+				ite user = joined.begin();
+				this->setPrivilageMode(user->second, true);
+			}
+		}
+		sendToAll(*member, RPL_QUIT(user_id(member->get_nick(),member->get_user(), member->get_servername()), reason), "QUIT", true);
 	}
 }
 
