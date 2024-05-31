@@ -104,16 +104,11 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 			{
 				channels[chan] = Channel(chan, &client);
 			}
-			else if ((channels[chan].getUsrLim() > 0) && (channels[chan].getSize() >= channels[chan].getUsrLim()))
-				client.send_msg(ERR_CHANNELISFULL(client.get_nick(), chan));
-			// pss needed for mode
-			else if (channels[chan].getHasPass() == true && (pass.empty() || pass != channels[chan].getKey()))
-				client.send_msg(ERR_BADCHANNELKEY(client.get_nick(), chan));
-			else if (channels[chan].getInviteOnlyMode() == true && (!channels[chan].isInvited(&client)))
-				client.send_msg(ERR_INVITEONLYCHAN(client.get_nick(),chan, client.get_servername()));
-			// added because of the mode
-			// if ((channels[chan].getPasswordNeeded() && pass == channels[chan].getKey() )|| validChan(chan) == 1)
-				channels[chan].addMember(&client);
+			if (pass.empty())
+				channels[chan].addMember(&client, "");
+			else
+				channels[chan].addMember(&client, pass);
+
 		}
 		else
 			client.send_msg(ERR_BADCHANMASK(client.get_nick(), client.get_servername()));
