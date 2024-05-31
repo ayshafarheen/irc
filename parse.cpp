@@ -73,6 +73,8 @@ int validChan(std::string channame)
 		return (1);
 	else if (channame.find("+") == 0)
 		return (1);
+	else if (channame.find(" "))
+		return (1);
 	return (0);
 }
 
@@ -80,18 +82,22 @@ int validChan(std::string channame)
 void Server::command_join_parsing(const std::string &args, Client &client)
 {
 	std::string chan, str, pass;
-	std::list<std::string> join;
+	std::vector<std::string> join;
 	std::stringstream strm(args);
 	itChan itr;
-	while (!strm.eof())
-	{
-		std::getline(strm, chan, ',');
-		join.push_back(chan);
-	}
-	if (args.size() > 1)
-	{
-		pass = args[1];
-	}
+	std::vector<std::string> vec = ft_split_whitespace(args);
+	std::vector<std::string>::iterator ite;
+	ite = vec.begin();
+	ite++;
+	if (vec.size() == 2)
+		pass = *ite;
+	ite--;
+	// while (!strm.eof())
+	// {
+	// 	std::getline(strm, chan, ',');
+	// 	join.push_back(chan);
+	// }
+	join = ft_split(*ite , ','); 
 	while (!join.empty())
 	{
 		chan = join.back();
@@ -110,7 +116,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 			}
 			else if (channels[chan].isInChan(&client) == false)
 			{
-				if (pass.empty())
+				if (pass.size() <= 0)
 					channels[chan].addMember(&client, "");
 				else
 					channels[chan].addMember(&client, pass);
@@ -157,16 +163,16 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 	ite++;
 	user_k = *ite;
 	++ite;
+
 	if (vec.size() >= 3)
 		comments = ft_strjoin_iterator(ite, vec);
 	std::cout << chan_name << " " << user_k << " " << comments << std::endl;
-
 	// double check the channel if it is exist
 	channel = channels.find(chan_name);
 	if (channel->first != chan_name)
 		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan_name, client.get_servername()));
 	useer = clients.find(user_k);
-	if (useer->first != user_k)
+	if (!channel->second.isInChan(&useer->second))
 		return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_k, chan_name));
 	// calling the function
 	channel->second.kickMember(&client, comments, &useer->second);
