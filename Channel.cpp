@@ -202,11 +202,8 @@ void Channel::kickMember(Client *member, const std::string &reason, Client *targ
 	{
 		if (iter != joined.end())
 		{
-			// Notify the member that they have been kicked
-			target->send_msg(RPL_KICK(user_id(member->get_nick(), member->get_user(), member->get_servername()), getChanName(), target->get_nick(), reason));
 			sendToAll(*member, (RPL_KICK(user_id(member->get_nick(), member->get_user(), member->get_servername()), getChanName(), target->get_nick(), reason)), "KICK", true);
 			// Notify all other members in the channel about the kick
-			member->send_msg((RPL_KICK(user_id(member->get_nick(), member->get_user(), member->get_servername()), getChanName(), target->get_nick(), reason)));
 			if (opers.find(target->get_nick()) != opers.end())
 				opers.erase(target->get_nick());
 			// Remove the member from the channel

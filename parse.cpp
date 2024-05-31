@@ -97,7 +97,7 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 	// 	std::getline(strm, chan, ',');
 	// 	join.push_back(chan);
 	// }
-	join = ft_split(*ite , ','); 
+	join = ft_split(*ite , ',');
 	while (!join.empty())
 	{
 		chan = join.back();
@@ -171,7 +171,7 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 	channel = channels.find(chan_name);
 	if (channel->first != chan_name)
 		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan_name, client.get_servername()));
-	useer = clients.find(user_k);
+	useer = auth_clients.find(user_k);
 	if (!channel->second.isInChan(&useer->second))
 		return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_k, chan_name));
 	// calling the function
@@ -201,7 +201,7 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 			return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
 		}
 	}
-	else 
+	else
 		client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 }
 
@@ -316,7 +316,7 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 	if (mode == "+o" || mode == "-o")
 	{
 		user_m = *ite;
-		useer = clients.find(user_m);
+		useer = auth_clients.find(trim(user_m));
 		if (!channel->second.isInChan(&useer->second))
 			return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_m, chan));
 		if (mode == "+o")
