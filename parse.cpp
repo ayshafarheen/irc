@@ -63,28 +63,25 @@ void Server::command_quit_parsing(const std::string &args, Client &client)
 	commandQuit(&client, args);
 }
 
-int validChan(std::string channame)
+bool validChan(std::string channame)
 {
-	if (channame.find("#") == 0)
-		return (1);
-	else if (channame.find("!") == 0)
-		return (1);
-	else if (channame.find("&") == 0)
-		return (1);
-	else if (channame.find("+") == 0)
-		return (1);
-	else if (channame.find(" "))
-		return (1);
-	return (0);
+    char firstChar = channame[0];
+	std::cout << firstChar << std::endl;
+    if (firstChar != '#' || firstChar != '!' || firstChar != '&' || firstChar != '+') {
+        return false;
+    }
+    return true;
 }
 
 // JOIN #chatroom1,#chatroom2
 void Server::command_join_parsing(const std::string &args, Client &client)
 {
-	std::string chan, str, pass;
+	std::string chan, pass;
 	std::vector<std::string> join;
 	std::stringstream strm(args);
 	itChan itr;
+	if (args.empty())
+		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "JOIN", client.get_servername()));
 	std::vector<std::string> vec = ft_split_whitespace(args);
 	std::vector<std::string>::iterator ite;
 	ite = vec.begin();
@@ -98,8 +95,8 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 		chan = join.back();
 		join.pop_back();
 		itr = channels.find(chan);
-		if (validChan(chan) == 1)
-		{
+		if (validChan(chan) == true)
+		{			
 			if (itr == channels.end())
 			{
 				channels[chan] = Channel(chan, &client);

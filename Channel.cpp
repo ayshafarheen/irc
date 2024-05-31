@@ -91,7 +91,7 @@ void Channel::setOper(Client *member)
 	{
 		for (ite opIt = opers.begin(); opIt != opers.end(); opIt++)
 		{
-			if (this->isInChan(member) == true)
+			if (this->isOper(member))
 			{
 				return member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
 			}
