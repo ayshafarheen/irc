@@ -59,6 +59,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
       // dans notre cas c'était tiff (client) qui voulait send a message
       // :lair.nl.eu.dal.net 404 tiff #pop :Cannot send to channel
 #define RPL_ADDVOICE(nickname, username, channel, mode, param, server) (":" + nickname + "!" + username + "@" + server+ " MODE #" + channel + " " + mode + " " + param + "\r\n")
+#define ERR_INVALIDLIMIT(client) ("472 " + client + " +l :is unknown mode char to me\r\n")
 
 // MOTD
 #define ERR_NOSUCHSERVER(client, servername) (":" + server+ " 402 " + client + " " + servername + " :No such server\r\n")

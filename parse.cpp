@@ -108,7 +108,6 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 				channels[chan].addMember(&client, "");
 			else
 				channels[chan].addMember(&client, pass);
-
 		}
 		else
 			client.send_msg(ERR_BADCHANMASK(client.get_nick(), client.get_servername()));
@@ -164,8 +163,6 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 		return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_k, chan_name));
 	// calling the function
 	channel->second.kickMember(&client, comments, &useer->second);
-	// std::cout << "CHANNEL: " << channel->first << std::endl;
-	// std::cout << "CHANNEL: " << channel->second.getKey() << std::endl;
 }
 
 // INVITE user123 #chatroom1
@@ -220,6 +217,22 @@ bool check_mode(std::string args)
 	return false;
 }
 
+bool Server::isValidPassword(const std::string &password)
+{
+	if (password.empty())
+		return false;
+
+	if (password.length() > 32)
+		return false;
+
+	for (std::string::const_iterator it = password.begin(); it != password.end(); ++it)
+	{
+		if (!std::isprint(*it) || std::isspace(*it))
+			return false;
+	}
+	return true;
+}
+
 // MODE #chatroom1 +o user123
 void Server::command_mode_parsing(const std::string &args, Client &client)
 {
@@ -271,25 +284,20 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 			channel->second.setUserLimit(client, -1);
 		return;
 	}
-
 	// 3 params modes
 	if (vec.size() < 3)
 		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "MODE", client.get_servername()));
 	if (vec.size() > 3)
 		return client.send_msg(ERR_UNKNOWNCOMMAND(client.get_nick(), "MODE", client.get_servername()));
-
 	// Takes password
 	if (mode == "+k")
 	{
 		std::string password = *ite;
 
-		//
-		// TODO: need to check the password !!
-		//
-
+		if (!isValidPassword(password))
+			return client.send_msg(ERR_INVALIDMODEPARAM(client.get_nick(), chan, "+l", password));
 		return channel->second.setPasswordNeededTrue(client, password);
 	}
-
 	// Takes member
 	if (mode == "+o" || mode == "-o")
 	{
@@ -303,16 +311,13 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 			channel->second.setPrivilageMode(&useer->second, false);
 		return;
 	}
-
 	// Takes limit
 	if (mode == "+l")
 	{
 		int limit = atoi((*ite).c_str());
 
-		//
-		// TODO: Check the limit
-		//
-
+		if (limit <= 0)
+			return client.send_msg(ERR_INVALIDLIMIT(client.get_nick()));
 		channel->second.setUserLimit(client, limit);
 		return;
 	}
@@ -405,13 +410,13 @@ void Server::command_topic_parsing(const std::string &args, Client &client)
 		// havent got the correct reply but working
 		else if (args_sp.size() == 2)
 		{
-			channels[channel].sendToAll(client,RPL_TOPIC_CHANGE(client.get_nick(), client.get_user(), channel, std::string(args_sp[1]), client.get_servername()), "TOPIC", true);
+			channels[channel].sendToAll(client, RPL_TOPIC_CHANGE(client.get_nick(), client.get_user(), channel, std::string(args_sp[1]), client.get_servername()), "TOPIC", true);
 			channels[channel].setTopic(std::string(args_sp[1]));
 		}
 		else if (args_sp.size() == 1 && args.find(':'))
 		{
 			channels[channel].setTopic("");
-			channels[channel].sendToAll(client,RPL_TOPIC_CHANGE(client.get_nick(), client.get_user(), channel, std::string(args_sp[1]), client.get_servername()), "TOPIC", true);
+			channels[channel].sendToAll(client, RPL_TOPIC_CHANGE(client.get_nick(), client.get_user(), channel, std::string(args_sp[1]), client.get_servername()), "TOPIC", true);
 		}
 		else if (args_sp.size() == 1)
 		{

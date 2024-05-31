@@ -101,6 +101,7 @@ class Server
 	void command_pass_parsing(const std::string &args, Client &client);
 	void command_part_parsing(const std::string &args, Client &client);
 	void command_motd_parsing(const std::string &args, Client &client);
+	bool isValidPassword(const std::string& password);
 
 	void authenticate(Client &client);
 	int port;

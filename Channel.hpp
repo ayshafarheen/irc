@@ -69,7 +69,6 @@ public:
 			void setUserLimit(Client &client, int limit);
 			bool getInviteOnlyMode();
 			bool getTopicMode();
-			bool getPasswordNeeded();
 			void	addToInvite(std::string name, Client *client, Client *invitor);
 			bool isInvited(Client *member);
 			std::string getMemberList();

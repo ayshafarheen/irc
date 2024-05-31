@@ -46,6 +46,7 @@ void Channel::setPrivilageMode(Client *member, bool enable)
         if (opers.find(member->get_nick()) == opers.end())
             return;
         opers.erase(member->get_nick());
+        // TODO: Make someone else operator ?
         this->sendToAll(*member, MODE_CHANNELMSGWITHPARAM(getChanName(), "-o", member->get_nick(), member->get_servername()), "MODE", true);
     }
 }
