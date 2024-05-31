@@ -159,7 +159,7 @@ bool Channel::validEntrance(Client *member, std::string key)
 	}
 	if (usrLim > 0 && (this->getSize() >= usrLim))
 	{
-		member->send_msg(ERR_CHANNELISFULL(member->get_nick(),name));
+		member->send_msg(ERR_CHANNELISFULL(member->get_nick(), name));
 		return false;
 	}
 	return true;
@@ -167,15 +167,15 @@ bool Channel::validEntrance(Client *member, std::string key)
 
 void Channel::addMember(Client *member, std::string key)
 {
-		 if (this->isInChan(member) == false && this->validEntrance(member,key))
-		{
-				joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
-	 			welcome(member);
-		}
-		if (this->isInvited(member) == true)
-		{
-			invited.erase(member->get_nick());
-		}
+	if (this->isInChan(member) == false && this->validEntrance(member, key))
+	{
+		joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
+		welcome(member);
+	}
+	if (this->isInvited(member) == true)
+	{
+		invited.erase(member->get_nick());
+	}
 }
 
 std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd, bool chan)
@@ -198,23 +198,28 @@ std::string Channel::sendToAll(Client &client, std::string msg, std::string cmd,
 void Channel::kickMember(Client *member, const std::string &reason, Client *target)
 {
 	ite iter = joined.find(target->get_nick());
-	if (iter != joined.end())
+	if (opers.find(member->get_nick()) != opers.end())
 	{
-		// Notify the member that they have been kicked
-		target->send_msg(RPL_KICK(user_id(member->get_nick(), member->get_user(), member->get_servername()), getChanName(), target->get_nick(), reason));
-		sendToAll(*member, (RPL_KICK(user_id(member->get_nick(), member->get_user(), member->get_servername()), getChanName(), target->get_nick(), reason)), "KICK", true);
-		// Notify all other members in the channel about the kick
-		member->send_msg((RPL_KICK(user_id(member->get_nick(), member->get_user(), member->get_servername()), getChanName(), target->get_nick(), reason)));
-		if (opers.find(target->get_nick()) != opers.end())
-			opers.erase(target->get_nick());
-		// Remove the member from the channel
-		joined.erase(iter);
+		if (iter != joined.end())
+		{
+			// Notify the member that they have been kicked
+			target->send_msg(RPL_KICK(user_id(member->get_nick(), member->get_user(), member->get_servername()), getChanName(), target->get_nick(), reason));
+			sendToAll(*member, (RPL_KICK(user_id(member->get_nick(), member->get_user(), member->get_servername()), getChanName(), target->get_nick(), reason)), "KICK", true);
+			// Notify all other members in the channel about the kick
+			member->send_msg((RPL_KICK(user_id(member->get_nick(), member->get_user(), member->get_servername()), getChanName(), target->get_nick(), reason)));
+			if (opers.find(target->get_nick()) != opers.end())
+				opers.erase(target->get_nick());
+			// Remove the member from the channel
+			joined.erase(iter);
+		}
+		else
+		{
+			// Member is not in the channel, send an error message
+			member->send_msg(ERR_USERNOTINCHANNEL(member->get_nick(), target->get_nick(), getChanName()));
+		}
 	}
 	else
-	{
-		// Member is not in the channel, send an error message
-		member->send_msg(ERR_USERNOTINCHANNEL(member->get_nick(), target->get_nick(), getChanName()));
-	}
+		member->send_msg(ERR_CHANOPRIVSNEEDED(member->get_nick(), getChanName(), member->get_servername()));
 }
 
 void Channel::memberQuit(Client *member, const std::string &reason)
@@ -235,7 +240,7 @@ void Channel::memberQuit(Client *member, const std::string &reason)
 				this->setPrivilageMode(user->second, true);
 			}
 		}
-		sendToAll(*member, RPL_QUIT(user_id(member->get_nick(),member->get_user(), member->get_servername()), reason), "QUIT", true);
+		sendToAll(*member, RPL_QUIT(user_id(member->get_nick(), member->get_user(), member->get_servername()), reason), "QUIT", true);
 	}
 }
 
