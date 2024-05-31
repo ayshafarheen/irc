@@ -13,7 +13,7 @@ Client::Client(int socket)
 	gethostname(_hostname, 1024);
 	hostname = (std::string)_hostname;
 }
-void Client::receive(int clientSocket, fd_set &current_sockets, std::map<std::string, Client> & clients, std::map<std::string, Client> & auth_clients)
+void Client::receive(int clientSocket, fd_set &current_sockets, std::map<std::string, Client> & clients, std::map<std::string, Client> & auth_clients, std::map<std::string, Channel> & channels)
 {
 	int fail = 0;
 	char buffer[1024] = {0};
@@ -28,7 +28,13 @@ void Client::receive(int clientSocket, fd_set &current_sockets, std::map<std::st
 		std::cout << "Connection closed! " << std::endl;
 		FD_CLR(clientSocket, &current_sockets);
 		if(auth_clients.find(nickname) != auth_clients.end() && (auth_clients.find(nickname)->second.get_fd() == clientSocket))
+		{
+			for (std::map<std::string,Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
+			{
+				i->second.change_in_all("",auth_clients.find(nickname)->second,"LEAVE");
+			}
 			auth_clients.erase(nickname);
+		}
 		clients.erase(Server::to_string(clientSocket));
 		close(clientSocket);
 	}
