@@ -37,6 +37,7 @@ void Server::serv_handle(int n)
 		std::cerr << "Incorrect password\n";
 }
 
+
 std::map<std::string, Client> &Server::get_client()
 {
 	return clients;

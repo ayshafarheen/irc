@@ -162,20 +162,11 @@ bool Channel::validEntrance(Client *member, std::string key)
 		member->send_msg(ERR_CHANNELISFULL(member->get_nick(),name));
 		return false;
 	}
-	// if (this->getSize() >= 1 && this->isInChan(member) == true){
-	// 		member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
-	// 		return false;
-	// 	}
 	return true;
 }
 
 void Channel::addMember(Client *member, std::string key)
 {
-		// if((this->isInChan(member)))
-		// {
-		// 	if (this->getSize() > 1 && this->isInChan(member) == true){
-		// 		member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
-		// }
 		 if (this->isInChan(member) == false && this->validEntrance(member,key))
 		{
 				joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));

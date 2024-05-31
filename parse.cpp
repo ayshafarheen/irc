@@ -614,20 +614,23 @@ void Server::command_names_parsing(const std::string &args, Client &client)
 	std::stringstream strm(args);
 	itChan itr;
 	if (args.size() < 1)
-		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "NAMES", client.get_servername()));
-	std::cout << args.size() << std::endl;
-	while (!strm.eof())
 	{
-		std::getline(strm, chan, ',');
-		join.push_back(chan);
+		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(),"NAMES",client.get_servername()));
 	}
-	while (!join.empty())
-	{
-		chan = join.back();
-		join.pop_back();
-		client.send_msg(RPL_NAMREPLY(client.get_nick(), '@', chan, channels[chan].getMemberList()));
-		client.send_msg(RPL_ENDOFNAMES(client.get_nick(), chan, client.get_servername()));
+	else{
+		while (!strm.eof())
+		{
+			std::getline(strm, chan, ',');
+			join.push_back(chan);
+		}
+		while (!join.empty())
+		{
+			chan = join.back();
+			join.pop_back();
+			client.send_msg(RPL_NAMREPLY(client.get_nick(), '@', chan, channels[chan].getMemberList()));
+			client.send_msg(RPL_ENDOFNAMES(client.get_nick(), chan, client.get_servername()));
 
+		}
 	}
 }
 

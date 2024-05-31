@@ -110,7 +110,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 
 // TOPIC
 # define RPL_TOPIC(client, channel, topic, server) (":" + server+ " 332 " + client + " "+ channel + " " + topic + "\r\n")
-# define RPL_NOTOPIC(client, channel, server) (":" + server+ " 331 " + client + " #" + channel + " :No topic is set\r\n")
+// # define RPL_NOTOPIC(client, channel, server) (":" + server+ " 331 " + client + " #" + channel + " :No topic is set\r\n")
 # define RPL_NOTOPIC(client, channel, server) (":" + server+ " 331 " + client + " #" + channel + " :No topic is set\r\n")
 # define RPL_TOPIC_CHANGE(nick, username, channel, topic, server) (":" + nick + "!" + username + "@" + server+ " TOPIC " + channel + " " + topic + "\r\n")
 
