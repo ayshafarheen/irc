@@ -245,7 +245,7 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 	++ite;
 
 	channel = channels.find(chan);
-	if (channel->first != chan)
+	if (channel == channels.end())
 		return client.send_msg(ERR_NOSUCHCHANNEL(client.get_nick(), chan, client.get_servername()));
 	if (!channels[chan].isOper(&client))
 		return client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
@@ -312,7 +312,7 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 	// Takes limit
 	if (mode == "+l")
 	{
-		int limit = stoi(*ite);
+		int limit = atoi((*ite).c_str());
 
 		//
 		// TODO: Check the limit

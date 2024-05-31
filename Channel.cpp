@@ -110,7 +110,7 @@ bool Channel::isOper(Client *member)
 	ite inv;
 
 	inv = opers.find(member->get_nick());
-	if (inv == opers.end() && !member->getOper())
+	if (inv == opers.end())
 		return false;
 	return true;
 }
@@ -200,7 +200,7 @@ void Channel::memberQuit(Client *member, const std::string &reason)
 
 	if (iter != joined.end())
 	{
-		sendToAll(*member, reason, "QUIT", true);
+		sendToAll(*member, RPL_QUIT(user_id(member->get_nick(),member->get_user(), member->get_servername()), reason), "QUIT", true);
 		joined.erase(iter);
 	}
 }

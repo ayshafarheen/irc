@@ -102,6 +102,10 @@ void Server::authenticate(Client &client)
 		client.send_msg(RPL_YOURHOST(client.get_nick(), hostname, "1.0", client.get_servername()));
 		client.send_msg(RPL_CREATED(client.get_nick(), date_time, client.get_servername()));
 		command_motd_parsing("", client);
+			for (std::map<std::string,Client>::iterator i = auth_clients.begin(); i != auth_clients.end(); ++i)
+	{
+		std::cout << ((*i).second).get_nick() << std::endl;
+	}
 	}
 }
 
@@ -209,4 +213,7 @@ void Server::commandQuit(Client *member, const std::string reason)
 	{
 		ite->second.memberQuit(member, reason);
 	}
+	if(auth_clients.find(member->get_nick()) != auth_clients.end())
+		auth_clients.erase(member->get_nick());
+	clients.erase(Server::to_string(member->get_fd()));
 }
