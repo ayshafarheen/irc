@@ -242,13 +242,13 @@ void Channel::memberQuit(Client *member, const std::string &reason)
 void Channel::addToInvite(std::string name, Client *client, Client *invitor)
 {
 	invited.insert(std::pair<std::string, Client *>(name, client));
-	invitor->send_msg(RPL_INVITING(invitor->get_id(), invitor->get_nick(), client->get_nick(), this->getChanName()));
+	invitor->send_msg(RPL_INVITING(user_id(invitor->get_nick(), invitor->get_user(), invitor->get_servername()), invitor->get_nick(), client->get_nick(), this->getChanName()));
 }
 
 void Channel::welcome(Client *member)
 {
 	std::string msg = "\n       WELCOME TO CHANNEL " + name + " !!!\n\n";
-	this->sendToAll(*member, RPL_JOIN(member->get_id(), name), "JOIN", true);
+	this->sendToAll(*member, RPL_JOIN(user_id(member->get_nick(), member->get_user(), member->get_servername()), name), "JOIN", true);
 	// member->send_msg(MODE_CHANNELMSG(name, ))
 	member->send_msg(msg);
 	if (!this->getTopic().empty())

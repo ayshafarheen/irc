@@ -37,7 +37,6 @@ void Server::serv_handle(int n)
 		std::cerr << "Incorrect password\n";
 }
 
-
 std::map<std::string, Client> &Server::get_client()
 {
 	return clients;
@@ -98,7 +97,7 @@ void Server::authenticate(Client &client)
 		time_t now = time(0);
 		char* date_time = ctime(&now);
 		client.set_id(client.get_nick() + "@" + hostname);
-		client.send_msg(RPL_WELCOME(client.get_id(), client.get_nick(), client.get_servername()));
+		client.send_msg(RPL_WELCOME(user_id(client.get_nick(), client.get_user(), client.get_servername()), client.get_nick(), client.get_servername()));
 		client.send_msg(RPL_YOURHOST(client.get_nick(), hostname, "1.0", client.get_servername()));
 		client.send_msg(RPL_CREATED(client.get_nick(), date_time, client.get_servername()));
 		command_motd_parsing("", client);

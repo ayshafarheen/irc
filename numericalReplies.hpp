@@ -103,7 +103,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 # define RPL_ERROR(user_id, reason) (user_id + " ERROR :" + reason + "\r\n")
 
 // PRIVMSG
-# define ERR_NOSUCHNICK(client, target, server) (":" + server + " 401 " + client + " " + target + " :No such nick/channel\r\n")
+# define ERR_NOSUCHNICK(client, target, server) (":" + server+ " 401 " + client + " " + target + " :No such nick/channel\r\n")
 # define ERR_NORECIPIENT(client) ("411 " + client + " :No recipient given PRIVMSG\r\n")
 # define ERR_NOTEXTTOSEND(client) ("412 " + client + " :No text to send\r\n")
 # define RPL_PRIVMSG(nick, username, target, message, server) (":" + nick + "!" + username + "@" + server+ " PRIVMSG " + target + " " + message + "\r\n")

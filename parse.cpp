@@ -553,7 +553,7 @@ void Server::command_priv_parsing(const std::string &args, Client &client)
 				channels[trim(*i)].sendToAll(client, RPL_PRIVMSG(client.get_nick(), client.get_user(), trim(*i), args_sp[1], client.get_servername()), "PRIVMSG", 1);
 			}
 			else
-				client.send_msg(ERR_NOSUCHNICK(client.get_nick(), std::string(trim(*i)), client.get_servername()));
+				client.send_msg(ERR_NOSUCHNICK(std::string(trim(*i)), client.get_nick(), client.get_servername()));
 		}
 	}
 }
