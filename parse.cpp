@@ -104,11 +104,17 @@ void Server::command_join_parsing(const std::string &args, Client &client)
 			{
 				channels[chan] = Channel(chan, &client);
 			}
-			if (pass.empty())
-				channels[chan].addMember(&client, "");
-			else
-				channels[chan].addMember(&client, pass);
-
+			else if (channels[chan].isInChan(&client))
+			{
+				client.send_msg(ERR_USERONCHANNEL(client.get_user(), client.get_nick(), chan,client.get_servername()));
+			}
+			else if (channels[chan].isInChan(&client) == false)
+			{
+				if (pass.empty())
+					channels[chan].addMember(&client, "");
+				else
+					channels[chan].addMember(&client, pass);
+			}
 		}
 		else
 			client.send_msg(ERR_BADCHANMASK(client.get_nick(), client.get_servername()));
@@ -191,7 +197,8 @@ void Server::command_invite_parsing(const std::string &args, Client &client)
 			return dest->second.send_msg(RPL_INVITE(user_id(client.get_nick(), client.get_user(), client.get_servername()), to_invite, chan));
 		}
 	}
-	client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
+	else 
+		client.send_msg(ERR_CHANOPRIVSNEEDED(client.get_nick(), chan, client.get_servername()));
 }
 
 // if they have none of them than it's just a wrong flag
@@ -294,7 +301,7 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 	if (mode == "+o" || mode == "-o")
 	{
 		user_m = *ite;
-		useer = clients.find(user_m);
+		useer = clients.find(user_m); 
 		if (useer->first != user_m)
 			return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_m, chan));
 
@@ -600,6 +607,30 @@ void Server::command_motd_parsing(const std::string &args, Client &client)
 		client.send_msg(ERR_NOMOTD(client.get_nick()));
 }
 
+void Server::command_names_parsing(const std::string &args, Client &client)
+{
+	std::string chan, str;
+	std::list<std::string> join;
+	std::stringstream strm(args);
+	itChan itr;
+	if (args.size() < 1)
+		return client.send_msg(ERR_NEEDMOREPARAMS(client.get_nick(), "NAMES", client.get_servername()));
+	std::cout << args.size() << std::endl;
+	while (!strm.eof())
+	{
+		std::getline(strm, chan, ',');
+		join.push_back(chan);
+	}
+	while (!join.empty())
+	{
+		chan = join.back();
+		join.pop_back();
+		client.send_msg(RPL_NAMREPLY(client.get_nick(), '@', chan, channels[chan].getMemberList()));
+		client.send_msg(RPL_ENDOFNAMES(client.get_nick(), chan, client.get_servername()));
+
+	}
+}
+
 // Typedef for function pointers
 typedef void (Server::*CommandFunction)(const std::string &args, Client &client);
 
@@ -625,6 +656,8 @@ void Server::parse_and_execute_client_command(const std::string &clientmsg, Clie
 		commandMap.insert(std::make_pair("PING", &Server::command_ping_parsing));
 		commandMap.insert(std::make_pair("PART", &Server::command_ping_parsing));
 		commandMap.insert(std::make_pair("PRIVMSG", &Server::command_priv_parsing));
+		commandMap.insert(std::make_pair("NAMES", &Server::command_names_parsing));
+
 	}
 	std::vector<std::string> commands = ft_split(clientmsg, '\n');
 	try

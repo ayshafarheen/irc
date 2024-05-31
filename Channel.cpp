@@ -76,6 +76,10 @@ bool Channel::isInChan(Client *member)
 		return (true);
 	else
 		return (false);
+	if (opers.find(member->get_nick()) != opers.end())
+		return (true);
+	else
+		return (false);
 }
 
 void Channel::setOper(Client *member)
@@ -154,15 +158,21 @@ bool Channel::validEntrance(Client *member, std::string key)
 		member->send_msg(ERR_CHANNELISFULL(member->get_nick(),name));
 		return false;
 	}
+	// if (this->getSize() >= 1 && this->isInChan(member) == true){
+	// 		member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
+	// 		return false;
+	// 	}
 	return true;
 }
 
 void Channel::addMember(Client *member, std::string key)
 {
-		if (this->getSize() > 1 && this->isInChan(member) == true){
-			return member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
-		}
-		if (this->isInChan(member) == false && this->validEntrance(member,key))
+		// if((this->isInChan(member)))
+		// {
+		// 	if (this->getSize() > 1 && this->isInChan(member) == true){
+		// 		member->send_msg(ERR_USERONCHANNEL(member->get_user(), member->get_nick(), this->getChanName(), member->get_servername()));
+		// }
+		 if (this->isInChan(member) == false && this->validEntrance(member,key))
 		{
 				joined.insert(std::pair<std::string, Client *>(member->get_nick(), member));
 	 			welcome(member);
@@ -239,7 +249,6 @@ void Channel::welcome(Client *member)
 		member->send_msg(RPL_TOPIC(member->get_nick(), name, this->getTopic(), member->get_servername()));
 	member->send_msg(RPL_NAMREPLY(member->get_nick(), '@', name, this->getMemberList()));
 	member->send_msg(RPL_ENDOFNAMES(member->get_nick(), name, member->get_servername()));
-	;
 }
 
 void Channel::change_in_all(std::string oldnick, Client &client, std::string cmd)

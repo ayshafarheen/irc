@@ -39,7 +39,8 @@ void Channel::setPrivilageMode(Client *member, bool enable)
             return;
         }
         opers.insert(std::pair<std::string, Client *>(member->get_nick(), member));
-        //member->send_msg(RPL_YOUREOPER(member->get_nick()));
+		member->set_oper(true);
+        member->send_msg(RPL_YOUREOPER(member->get_nick()));
         this->sendToAll(*member, MODE_CHANNELMSGWITHPARAM(getChanName(), "+o", member->get_nick(), member->get_servername()), "MODE", true);
     }
     else
@@ -48,6 +49,7 @@ void Channel::setPrivilageMode(Client *member, bool enable)
             return;
         opers.erase(member->get_nick());
         this->sendToAll(*member, MODE_CHANNELMSGWITHPARAM(getChanName(), "-o", member->get_nick(), member->get_servername()), "MODE", true);
+		member->set_oper(false);
     }
 }
 
