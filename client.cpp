@@ -116,7 +116,7 @@ int Client::get_auth() const
 
 void Client::send_msg(std::string msg)
 {
-	std::cout << "Sending " << msg << " to " << fd << std::endl;
+      	std::cout << "Sending " << msg << " to " << fd << std::endl;
 	const char* message = msg.c_str();
 	ssize_t messageLength = strlen(message);
 	ssize_t bytesSent = send(fd, message, messageLength, 0);
