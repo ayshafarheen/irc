@@ -163,7 +163,7 @@ void Server::command_kick_parsing(const std::string &args, Client &client)
 	if (useer->first != user_k)
 		return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), user_k, chan_name));
 	// calling the function
-	channel->second.kickMember(&useer->second, comments);
+	channel->second.kickMember(&client, comments, &useer->second);
 	// std::cout << "CHANNEL: " << channel->first << std::endl;
 	// std::cout << "CHANNEL: " << channel->second.getKey() << std::endl;
 }
@@ -306,12 +306,13 @@ void Server::command_mode_parsing(const std::string &args, Client &client)
 	}
 
 	// Takes limit
-	if (mode == "+l") {
+	if (mode == "+l")
+	{
 		int limit = stoi(*ite);
 
 		//
 		// TODO: Check the limit
-		// 
+		//
 
 		channel->second.setUserLimit(client, limit);
 		return;
@@ -538,7 +539,12 @@ void Server::command_priv_parsing(const std::string &args, Client &client)
 			if (auth_clients.find(trim(*i)) != auth_clients.end())
 				auth_clients[trim(*i)].send_msg(RPL_PRIVMSG(client.get_nick(), client.get_user(), trim(*i), args_sp[1], client.get_servername()));
 			else if (channels.find(trim(*i)) != channels.end())
+			{
+				if (!channels[trim(*i)].isInChan(&client))
+					return client.send_msg(ERR_USERNOTINCHANNEL(client.get_nick(), client.get_nick(), channels[trim(*i)].getChanName()));
+
 				channels[trim(*i)].sendToAll(client, RPL_PRIVMSG(client.get_nick(), client.get_user(), trim(*i), args_sp[1], client.get_servername()), "PRIVMSG", 1);
+			}
 			else
 				client.send_msg(ERR_NOSUCHNICK(client.get_nick(), std::string(trim(*i))));
 		}

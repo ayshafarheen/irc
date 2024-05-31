@@ -58,7 +58,7 @@ public:
 			bool getHasPass();
 			bool isOper(Client *member);
 			std::string sendToAll(Client &client, std::string msg, std::string cmd, bool chan);
-			void kickMember(Client *member, const std::string &reason);
+			void kickMember(Client *member, const std::string &reason, Client *target);
 			bool isInChan(Client *member);
 			void memberQuit(Client *member, const std::string &reason);
 			void setInviteOnlyMode(Client &client, bool enable);
