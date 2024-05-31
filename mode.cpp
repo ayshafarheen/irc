@@ -15,13 +15,18 @@ void Channel::setInviteOnlyMode(Client &client, bool enable)
 		sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "-i", client.get_servername()), "MODE", true);
 }
 
-void Channel::setPasswordNeeded(Client &client, bool enable)
+void Channel::setPasswordNeededTrue(Client &client, std::string &password)
 {
-    this->passwordNeeded = enable;
-    if (enable == true)
-		sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "+k", client.get_servername()), "MODE", true);
-	else
-		sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "-k", client.get_servername()), "MODE", true);
+    this->hasPass = true;
+    this->key = password;
+	sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "+k", client.get_servername()), "MODE", true);
+}
+
+void Channel::setPasswordNeededFalse(Client &client)
+{
+    this->hasPass = false;
+
+	sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "-k", client.get_servername()), "MODE", true);
 }
 
 void Channel::setPrivilageMode(Client *member, bool enable)
@@ -49,17 +54,19 @@ void Channel::setPrivilageMode(Client *member, bool enable)
 void Channel::setTopicMode(Client &client, bool enable)
 {
     this->topicMode = enable;
+
     if (enable == true)
 		sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "+t", client.get_servername()), "MODE", true);
 	else
 		sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "-t", client.get_servername()), "MODE", true);
 }
 
-void Channel::setLimitMember(Client &client, bool enable)
+void Channel::setUserLimit(Client &client, int limit)
 {
-    this->limitMode = enable;
-    if (enable == true)
-		sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "+l", client.get_servername()), "MODE", true);
-	else
+    this->usrLim = limit;
+
+    if (limit == -1)
 		sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "-l", client.get_servername()), "MODE", true);
+    else
+		sendToAll(client, MODE_CHANNELMSG(this->getChanName(), "+l", client.get_servername()), "MODE", true);
 }
