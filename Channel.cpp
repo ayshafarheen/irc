@@ -203,15 +203,12 @@ void Channel::kickMember(Client *member, const std::string &reason, Client *targ
 		if (iter != joined.end())
 		{
 			sendToAll(*member, (RPL_KICK(user_id(member->get_nick(), member->get_user(), member->get_servername()), getChanName(), target->get_nick(), reason)), "KICK", true);
-			// Notify all other members in the channel about the kick
 			if (opers.find(target->get_nick()) != opers.end())
 				opers.erase(target->get_nick());
-			// Remove the member from the channel
 			joined.erase(iter);
 		}
 		else
 		{
-			// Member is not in the channel, send an error message
 			member->send_msg(ERR_USERNOTINCHANNEL(member->get_nick(), target->get_nick(), getChanName()));
 		}
 	}
@@ -251,7 +248,6 @@ void Channel::welcome(Client *member)
 {
 	std::string msg = "\n       WELCOME TO CHANNEL " + name + " !!!\n\n";
 	this->sendToAll(*member, RPL_JOIN(user_id(member->get_nick(), member->get_user(), member->get_servername()), name), "JOIN", true);
-	// member->send_msg(MODE_CHANNELMSG(name, ))
 	member->send_msg(msg);
 	if (!this->getTopic().empty())
 		member->send_msg(RPL_TOPIC(member->get_nick(), name, this->getTopic(), member->get_servername()));
@@ -261,7 +257,6 @@ void Channel::welcome(Client *member)
 
 void Channel::change_in_all(std::string oldnick, Client &client, std::string cmd)
 {
-	// std::cout << "pls work " << joined.find(oldnick)->second->get_nick() << std::endl;
 	if (cmd == "NICK")
 	{
 		if (joined.find(oldnick) != joined.end())

@@ -32,7 +32,6 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 
 // KICK
 # define ERR_USERNOTINCHANNEL(client, nickname, channel) ("441 " + client + " " + nickname + " " + channel + " :They aren't on that channel\r\n")
-// # define ERR_CHANOPRIVSNEEDED(client, channel) ("482 " + client + " #" +  channel + " :You're not channel \r\n")
 # define RPL_KICK(user_id, channel, kicked, reason) (user_id + " KICK " + channel + " " + kicked + " " + reason + "\r\n")
 
 // KILL
@@ -55,9 +54,6 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 #define ERR_CHANNELISFULL(client, channel) ("471 " + client + " " + channel + " :Cannot join channel (+l)\r\n")
 #define ERR_CHANOPRIVSNEEDED(client, channel, server) (":" + server+ " 482 " + client + " " + channel + " :You're not channel operator\r\n")
 #define ERR_INVALIDMODEPARAM(client, channel, mode, password) ("696 " + client + " " + channel + " " + mode + " " + password + " : password must only contained alphabetic character\r\n")
-// RPL_ERR a broadcoast quand user pas +v ou operator veut parler
-      // dans notre cas c'était tiff (client) qui voulait send a message
-      // :lair.nl.eu.dal.net 404 tiff #pop :Cannot send to channel
 #define RPL_ADDVOICE(nickname, username, channel, mode, param, server) (":" + nickname + "!" + username + "@" + server+ " MODE #" + channel + " " + mode + " " + param + "\r\n")
 #define ERR_INVALIDLIMIT(client) ("472 " + client + " +l :is unknown mode char to me\r\n")
 
@@ -110,8 +106,7 @@ void	sendServerRpl(int const client_fd, std::string client_buffer);
 # define RPL_PRIVMSG(nick, username, target, message, server) (":" + nick + "!" + username + "@" + server+ " PRIVMSG " + target + " " + message + "\r\n")
 
 // TOPIC
-# define RPL_TOPIC(client, channel, topic, server) (":" + server+ " 332 " + client + " "+ channel + " " + topic + "\r\n")
-// # define RPL_NOTOPIC(client, channel, server) (":" + server+ " 331 " + client + " #" + channel + " :No topic is set\r\n")
+# define RPL_TOPIC(client, channel, topic, server) (":" + server+ " 332 " + client + " "+ channel + " :" + topic + "\r\n")
 # define RPL_NOTOPIC(client, channel, server) (":" + server+ " 331 " + client + " #" + channel + " :No topic is set\r\n")
 # define RPL_TOPIC_CHANGE(nick, username, channel, topic, server) (":" + nick + "!" + username + "@" + server+ " TOPIC " + channel + " " + topic + "\r\n")
 

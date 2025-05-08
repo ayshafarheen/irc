@@ -76,9 +76,5 @@ public:
 			void change_in_all(std::string oldnick, Client &client, std::string cmd);
 			bool validEntrance(Client *member, std::string key);
 			void erase();
-
-			// void	change_in_joined(std::string name, Client &client, std::map<std::string,Channel>::iterator);
-			// void	change_in_invited(std::string name, Client &client, std::map<std::string,Channel>::iterator);
-			// void	change_in_opers(std::string name, Client &client, std::map<std::string,Channel>::iterator);
 };
 #endif

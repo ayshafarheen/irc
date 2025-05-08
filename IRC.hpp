@@ -22,7 +22,6 @@
 #include "numericalReplies.hpp"
 #include "Channel.hpp"
 #include <ios>
-#include "Commands.hpp"
 
 
 class Channel;
@@ -30,7 +29,6 @@ class Client
 {
 	std::string nickname;
 	std::string username;
-	// std::string user_type;
 	std::string msg;
 	std::string hostname;
 	std::string servername;
@@ -131,20 +129,6 @@ class Server
 	void parse_and_execute_client_command(const std::string &clientmsg, Client &client);
 	void commandQuit(Client *member, const std::string reason);
 };
-// std::vector<std::string> ft_split(coknst std::string &str, char delimiter);
 
-//commands
-/*
-KICK
-INVITE
-TOPIC;l
-	 Set/remove the user limit to channel
-USER
-NICK
-PASS
-CREATE
-JOIN
-PRIVMSG
-*/
 
 #endif

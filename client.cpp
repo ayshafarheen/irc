@@ -13,12 +13,12 @@ Client::Client(int socket)
 	gethostname(_hostname, 1024);
 	hostname = (std::string)_hostname;
 }
-void Client::receive(int clientSocket, fd_set &current_sockets, std::map<std::string, Client> & clients, std::map<std::string, Client> & auth_clients, std::map<std::string, Channel> & channels)
+void Client::receive(int clientSocket, fd_set &current_sockets, std::map<std::string, Client> &clients, std::map<std::string, Client> &auth_clients, std::map<std::string, Channel> &channels)
 {
 	int fail = 0;
 	char buffer[1024] = {0};
 	int count = 0;
-	top:
+top:
 	while ((count = recv(clientSocket, &buffer[fail], sizeof(buffer) - fail, 0)) > 0)
 		fail += count;
 	if (fail == -1)
@@ -27,18 +27,18 @@ void Client::receive(int clientSocket, fd_set &current_sockets, std::map<std::st
 	{
 		std::cout << "Connection closed! " << std::endl;
 		FD_CLR(clientSocket, &current_sockets);
-		if(auth_clients.find(nickname) != auth_clients.end() && (auth_clients.find(nickname)->second.get_fd() == clientSocket))
+		if (auth_clients.find(nickname) != auth_clients.end() && (auth_clients.find(nickname)->second.get_fd() == clientSocket))
 		{
-			for (std::map<std::string,Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
+			for (std::map<std::string, Channel>::iterator i = channels.begin(); i != channels.end(); ++i)
 			{
-				i->second.change_in_all("",auth_clients.find(nickname)->second,"LEAVE");
+				i->second.change_in_all("", auth_clients.find(nickname)->second, "LEAVE");
 			}
 			auth_clients.erase(nickname);
 		}
 		clients.erase(Server::to_string(clientSocket));
 		close(clientSocket);
 	}
-	else if(strchr(buffer,'\n'))
+	else if (strchr(buffer, '\n'))
 		msg = std::string(buffer);
 	else
 		goto top;
@@ -59,9 +59,9 @@ Client::Client()
 
 int Client::invalid_nick(std::string nick)
 {
-	for(unsigned long i=0 ; i < nick.length(); i++)
+	for (unsigned long i = 0; i < nick.length(); i++)
 	{
-		if(isalnum(nick[i]) || nick[i] == '}' || nick[i] == '_' || nick[i] == '{' || nick[i] == '[' || nick[i] ==']' || nick[i] =='|' || nick[i] == '\\')
+		if (isalnum(nick[i]) || nick[i] == '}' || nick[i] == '_' || nick[i] == '{' || nick[i] == '[' || nick[i] == ']' || nick[i] == '|' || nick[i] == '\\')
 			continue;
 		else
 			return 1;
@@ -69,7 +69,7 @@ int Client::invalid_nick(std::string nick)
 	return 0;
 }
 
-void	Client::set_oper(bool oper)
+void Client::set_oper(bool oper)
 {
 	isOper = oper;
 }
@@ -113,11 +113,10 @@ int Client::get_auth() const
 	return auth;
 }
 
-
 void Client::send_msg(std::string msg)
 {
-      	std::cout << "Sending " << msg << " to " << fd << std::endl;
-	const char* message = msg.c_str();
+	// std::cout << "Sending " << msg << " to " << fd << std::endl;
+	const char *message = msg.c_str();
 	ssize_t messageLength = strlen(message);
 	ssize_t bytesSent = send(fd, message, messageLength, 0);
 	if (bytesSent == -1)
@@ -143,7 +142,6 @@ std::string Client::get_id() const
 {
 	return id;
 }
-
 
 void Client::set_nick(std::string nick)
 {
@@ -180,9 +178,9 @@ Client::Client(const Client &obj)
 	*this = obj;
 }
 
-Client & Client::operator=(const Client &obj)
+Client &Client::operator=(const Client &obj)
 {
-	if(this != &obj)
+	if (this != &obj)
 	{
 		char _hostname[1024];
 		gethostname(_hostname, 1024);
@@ -196,7 +194,7 @@ Client & Client::operator=(const Client &obj)
 	return *this;
 }
 
-std::ostream& operator<<(std::ostream& out, const Client &client)
+std::ostream &operator<<(std::ostream &out, const Client &client)
 {
 	return out << client.get_auth() << " " << client.get_nick() << " " << client.get_user() << "\n";
 }
